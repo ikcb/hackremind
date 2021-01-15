@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "autofix/no-unused-vars": "error",
+    "prettier/prettier": "error"
+  },
+  "env": {
+    "es6": true,
+    "commonjs": true,
+    "node": true
+  },
+  "extends": ["airbnb-base", "prettier"],
+  "plugins": ["autofix", "prettier"]
+}
