@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "no-console": 0,
+    "autofix/no-unused-vars": "error",
+    "prettier/prettier": "error"
+  },
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "extends": [
+    "airbnb-base",
+    "plugin:security/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["autofix", "security", "prettier"]
+}
