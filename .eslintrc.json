@@ -1,8 +1,10 @@
 {
   "rules": {
     "no-console": 0,
-    "autofix/no-unused-vars": "error",
-    "prettier/prettier": "error"
+    "no-unused-expressions": 0,
+    "autofix/no-unused-vars": 2,
+    "sort-requires/sort-requires": 2,
+    "prettier/prettier": 2
   },
   "env": {
     "node": true,
@@ -13,5 +15,5 @@
     "plugin:security/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["autofix", "security", "prettier"]
+  "plugins": ["autofix", "security", "sort-requires", "prettier"]
 }
