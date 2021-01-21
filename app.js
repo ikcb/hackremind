@@ -51,7 +51,7 @@ DEBUG || app.use(helmet());
 app.use('/api', BaseRouter);
 
 // Print API errors
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   console.error(err);
   return res.status(StatusCodes.BAD_REQUEST).json({
     error: err.message
