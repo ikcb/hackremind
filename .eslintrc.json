@@ -2,17 +2,15 @@
   "rules": {
     "no-console": 0,
     "no-unused-expressions": 0,
+    "no-process-exit": 0,
     "no-unused-vars": [2, { "args": "none" }],
     "autofix/no-unused-vars": [2, { "args": "none" }],
     "sort-requires/sort-requires": 2,
     "prettier/prettier": 2
   },
-  "env": {
-    "node": true,
-    "es2021": true
-  },
   "extends": [
     "airbnb-base",
+    "plugin:node/recommended",
     "plugin:security/recommended",
     "plugin:prettier/recommended"
   ],

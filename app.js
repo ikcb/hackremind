@@ -3,7 +3,7 @@ const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
 const logger = require('morgan');
-const mongoose = require('mongoose');
+const { connect, connection } = require('mongoose');
 const { StatusCodes } = require('http-status-codes');
 require('dotenv').config();
 
@@ -15,18 +15,15 @@ const DEBUG = process.env.NODE_ENV !== 'production';
  * Connect to MongoDB instance
  */
 
-mongoose.connect(process.env.MONGO_URI, {
-  user: process.env.MONGO_USER,
-  pass: process.env.MONGO_PWD,
-  dbName: 'hackremind',
+connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
+  useFindAndModify: false,
   useCreateIndex: true,
   useUnifiedTopology: true
 });
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', () => DEBUG && console.log("we're connected!"));
+connection.on('error', console.error.bind(console, 'connection error:'));
+connection.once('open', () => DEBUG && console.log('mongodb connected'));
 
 /**
  * Set basic express settings

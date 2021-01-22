@@ -1,7 +1,12 @@
 {
   "private": true,
   "name": "hackremind",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "bin": {
+    "hackremind-web": "./bin/www",
+    "hackremind-worker": "./bin/worker"
+  },
   "scripts": {
     "lint": "lint-staged --allow-empty",
     "start": "node ./bin/www",
@@ -27,6 +32,7 @@
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-autofix": "^1.0.3",
     "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-sort-requires": "^2.1.0",
@@ -37,5 +43,8 @@
     "nodemon": "^2.0.7",
     "prettier": "^2.2.1",
     "prettier-package-json": "^2.1.3"
+  },
+  "engines": {
+    "node": ">=14.15.4"
   }
 }
