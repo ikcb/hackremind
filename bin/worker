@@ -41,34 +41,77 @@ const storeIfNotExists = async event =>
    * Fetch data from CLIST and store in MongoDB
    */
 
-  const url = new URL('https://clist.by/api/v1/contest/');
+  const clistURL = new URL('https://clist.by/api/v1/contest/');
 
-  url.search = new URLSearchParams({
+  clistURL.search = new URLSearchParams({
     limit: 1024,
     start__gt: new Date().toISOString()
   });
 
-  const response = await fetch(url, {
+  const clistRes = await fetch(clistURL, {
     headers: { Authorization: process.env.CLIST_BEARER }
   });
 
-  checkStatus(response);
-  const json = await response.json();
+  checkStatus(clistRes);
+  const clistJSON = await clistRes.json();
 
   await Promise.all(
-    json.objects
+    clistJSON.objects
       .filter(({ event }) => /^[ -~]+$/.test(event))
-      .map(el => ({
-        title: el.event,
-        host: el.resource.name,
-        url: el.href,
-        start: el.start,
-        end: el.end
+      .map(e => ({
+        title: e.event,
+        host: e.resource.name,
+        url: e.href,
+        start: e.start,
+        end: e.end
       }))
+      .map(storeIfNotExists)
+  );
+
+  /**
+   * Fetch data from Devfolio and store in MongoDB
+   */
+
+  const devfolioURL = new URL('https://devfolio.co/api/hackathons');
+
+  devfolioURL.search = new URLSearchParams({
+    filter: 'all',
+    page: 1,
+    limit: 20
+  });
+
+  const devfolioRes = await fetch(devfolioURL);
+  checkStatus(devfolioRes);
+  const devfolioJSON = await devfolioRes.json();
+
+  await Promise.all(
+    devfolioJSON.result
+      .filter(({ starts_at }) => starts_at > new Date().toISOString())
+      .reduce(
+        (r, e) =>
+          r.push(
+            {
+              title: `${e.name} - Apply Now`,
+              host: 'devfolio.co',
+              url: e.hackathon_setting.site,
+              start: e.hackathon_setting.reg_starts_at,
+              end: e.hackathon_setting.reg_ends_at
+            },
+            {
+              title: `${e.name} - Participate`,
+              host: 'devfolio.co',
+              url: e.hackathon_setting.site,
+              start: e.starts_at,
+              end: e.ends_at
+            }
+          ) && r,
+        []
+      )
       .map(storeIfNotExists)
   );
 
   process.exit();
 })().catch(err => {
   console.error(err);
+  process.exit(1);
 });

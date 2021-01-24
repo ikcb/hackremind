@@ -3,12 +3,21 @@
     "no-console": 0,
     "no-unused-expressions": 0,
     "no-process-exit": 0,
+    "camelcase": [
+      2,
+      {
+        "properties": "never",
+        "ignoreDestructuring": true,
+        "allow": ["_at$"]
+      }
+    ],
     "no-unused-vars": [2, { "args": "none" }],
     "autofix/no-unused-vars": [2, { "args": "none" }],
     "sort-requires/sort-requires": 2,
     "prettier/prettier": 2
   },
   "extends": [
+    "eslint:recommended",
     "airbnb-base",
     "plugin:node/recommended",
     "plugin:security/recommended",
