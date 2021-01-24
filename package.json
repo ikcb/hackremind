@@ -10,7 +10,8 @@
   "scripts": {
     "lint": "lint-staged --allow-empty",
     "start": "node ./bin/www",
-    "start:dev": "nodemon"
+    "start:dev": "nodemon",
+    "start:worker": "node ./bin/worker"
   },
   "dependencies": {
     "cookie-parser": "^1.4.4",

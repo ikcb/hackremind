@@ -1,1 +1,74 @@
 #!/usr/bin/env node
+
+const fetch = require('node-fetch');
+const { connect } = require('mongoose');
+require('dotenv').config();
+
+const Event = require('../models/event.model');
+
+class HTTPResponseError extends Error {
+  constructor(res, ...args) {
+    super(`HTTP Error Response: ${res.status} ${res.statusText}`, ...args);
+    this.response = res;
+  }
+}
+
+const checkStatus = response => {
+  if (response.ok) return response;
+  throw new HTTPResponseError(response);
+};
+
+const storeIfNotExists = async event =>
+  Event.findOneAndUpdate(
+    event,
+    { $setOnInsert: event },
+    { upsert: true, new: true }
+  ).exec();
+
+(async () => {
+  /**
+   * Connect to MongoDB instance
+   */
+
+  await connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+    useUnifiedTopology: true
+  });
+
+  /**
+   * Fetch data from CLIST and store in MongoDB
+   */
+
+  const url = new URL('https://clist.by/api/v1/contest/');
+
+  url.search = new URLSearchParams({
+    limit: 1024,
+    start__gt: new Date().toISOString()
+  });
+
+  const response = await fetch(url, {
+    headers: { Authorization: process.env.CLIST_BEARER }
+  });
+
+  checkStatus(response);
+  const json = await response.json();
+
+  await Promise.all(
+    json.objects
+      .filter(({ event }) => /^[ -~]+$/.test(event))
+      .map(el => ({
+        title: el.event,
+        host: el.resource.name,
+        url: el.href,
+        start: el.start,
+        end: el.end
+      }))
+      .map(storeIfNotExists)
+  );
+
+  process.exit();
+})().catch(err => {
+  console.error(err);
+});

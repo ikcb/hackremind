@@ -6,7 +6,10 @@
 
 const debug = require('debug')('hackremind:server');
 const http = require('http');
+const { connect, connection } = require('mongoose');
+require('dotenv').config();
 
+const DEBUG = process.env.NODE_ENV !== 'production';
 const app = require('../app');
 
 /**
@@ -73,7 +76,7 @@ function onError(error) {
 function onListening() {
   const addr = server.address();
   const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`;
-  debug(`Listening on ${bind}`);
+  DEBUG && debug(`Listening on ${bind}`);
 }
 
 /**
@@ -83,3 +86,21 @@ function onListening() {
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+/**
+ * Connect to MongoDB instance
+ */
+
+connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useFindAndModify: false,
+  useCreateIndex: true,
+  useUnifiedTopology: true
+});
+
+connection.on('error', console.error.bind(console, 'connection error:'));
+connection.once('open', () => DEBUG && console.log('mongodb connected'));
+
+process.on('SIGTERM', () =>
+  server.close(() => connection.close(false, () => process.exit()))
+);

@@ -3,7 +3,7 @@ const { Schema, model } = require('mongoose');
 const eventSchema = new Schema({
   title: String,
   host: String,
-  url: { type: String, unique: true },
+  url: String,
   start: Date,
   end: Date
 });
