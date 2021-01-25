@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 const fetch = require('node-fetch');
-const { connect } = require('mongoose');
+const { connect, connection } = require('mongoose');
+const { JSDOM } = require('jsdom');
 require('dotenv').config();
 
 const Event = require('../models/event.model');
@@ -110,6 +111,65 @@ const storeIfNotExists = async event =>
       .map(storeIfNotExists)
   );
 
+  /**
+   * Fetch data from Devpost and store in MongoDB
+   */
+
+  const devpostURLs = new Set();
+
+  await Promise.all(
+    Array.from({ length: 5 }, (_, i) => i + 1).map(async page => {
+      const endpoint = new URL('https://devpost.com/hackathons');
+      endpoint.search = new URLSearchParams({
+        challenge_type: 'all',
+        page,
+        sort_by: 'Prize Amount',
+        utf8: '✓'
+      });
+
+      const response = await fetch(endpoint);
+      checkStatus(response);
+      const body = await response.text();
+
+      body
+        .match(/https:\/\/([-\w]+)\.devpost\.com/g)
+        .forEach(e => devpostURLs.add(e));
+    })
+  );
+
+  ['secure', 'post', 'info', 'help', 'api'].forEach(e =>
+    devpostURLs.delete(`https://${e}.devpost.com`)
+  );
+
+  const devpostObjects = [];
+
+  await Promise.all(
+    [...devpostURLs].map(async url => {
+      const dom = await JSDOM.fromURL(url);
+
+      devpostObjects.push(
+        JSON.parse(
+          dom.window.document
+            .querySelector('#challenge-json-ld')
+            .textContent.trim()
+        )
+      );
+    })
+  );
+
+  await Promise.all(
+    devpostObjects
+      .map(e => ({
+        title: e.name,
+        host: 'devpost.com',
+        url: e.url,
+        start: e.startDate,
+        end: e.endDate
+      }))
+      .map(storeIfNotExists)
+  );
+
+  await connection.close();
   process.exit();
 })().catch(err => {
   console.error(err);

@@ -11,6 +11,7 @@
         "allow": ["_at$"]
       }
     ],
+    "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
     "no-unused-vars": [2, { "args": "none" }],
     "autofix/no-unused-vars": [2, { "args": "none" }],
     "sort-requires/sort-requires": 2,
