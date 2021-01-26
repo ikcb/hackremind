@@ -19,12 +19,49 @@ const checkStatus = response => {
   throw new HTTPResponseError(response);
 };
 
-const storeIfNotExists = async event =>
-  Event.findOneAndUpdate(
+const newEvents = [];
+
+const allowedHosts = [
+  'atcoder.jp',
+  'open.kattis.com',
+  'icfpcontest.org',
+  'leetcode.com',
+  'hackerrank.com',
+  'adventofcode.com',
+  'spoj.com',
+  'tlx.toki.id',
+  'topcoder.com',
+  'codeforces.com',
+  'codingame.com',
+  'russianaicup.ru',
+  'dmoj.ca',
+  'bubblecup.org',
+  'codeforces.com/gyms',
+  'projecteuler.net',
+  'facebook.com/hackercup',
+  'ctftime.org',
+  'kaggle.com',
+  'e-olymp.com',
+  'codechef.com',
+  'codingcompetitions.withgoogle.com',
+  'codility.com',
+  'azspcs.net',
+  'hackerearth.com',
+  'devfolio.co',
+  'devpost.com'
+];
+
+const storeIfNotExists = async event => {
+  if (!allowedHosts.includes(event.host)) return;
+
+  const res = await Event.findOneAndUpdate(
     event,
     { $setOnInsert: event },
-    { upsert: true, new: true }
-  ).exec();
+    { upsert: true, new: true, rawResult: true }
+  );
+
+  res.lastErrorObject.updatedExisting || newEvents.push(res.value);
+};
 
 (async () => {
   /**
@@ -116,6 +153,7 @@ const storeIfNotExists = async event =>
    */
 
   const devpostURLs = new Set();
+  const devpostObjects = [];
 
   await Promise.all(
     Array.from({ length: 5 }, (_, i) => i + 1).map(async page => {
@@ -127,21 +165,29 @@ const storeIfNotExists = async event =>
         utf8: '✓'
       });
 
-      const response = await fetch(endpoint);
-      checkStatus(response);
-      const body = await response.text();
+      const dom = await JSDOM.fromURL(endpoint);
 
-      body
-        .match(/https:\/\/([-\w]+)\.devpost\.com/g)
+      dom.window.document.body.innerHTML
+        .match(/https:\/\/([-\w]+)\.devpost\.com\//g)
         .forEach(e => devpostURLs.add(e));
+
+      devpostObjects.push(
+        ...Object.values(
+          JSON.parse(
+            dom.window.document
+              .querySelector('#challenges-json-ld')
+              .textContent.trim()
+          )
+        )
+      );
     })
   );
 
   ['secure', 'post', 'info', 'help', 'api'].forEach(e =>
-    devpostURLs.delete(`https://${e}.devpost.com`)
+    devpostURLs.delete(`https://${e}.devpost.com/`)
   );
 
-  const devpostObjects = [];
+  devpostObjects.forEach(e => devpostURLs.delete(e.url));
 
   await Promise.all(
     [...devpostURLs].map(async url => {
@@ -168,6 +214,8 @@ const storeIfNotExists = async event =>
       }))
       .map(storeIfNotExists)
   );
+
+  // console.log(newEvents);
 
   await connection.close();
   process.exit();
