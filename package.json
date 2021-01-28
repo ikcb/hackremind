@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
+    "got": "^11.8.1",
     "jsdom": "^16.4.0",
-    "mongoose": "^5.11.13",
-    "node-fetch": "^2.6.1"
+    "mongoose": "^5.11.13"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",

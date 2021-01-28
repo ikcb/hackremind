@@ -1,55 +1,14 @@
 #!/usr/bin/env node
 
-const fetch = require('node-fetch');
+const got = require('got');
 const { connect, connection } = require('mongoose');
 const { JSDOM } = require('jsdom');
 require('dotenv').config();
 
 const Event = require('../models/event.model');
-
-class HTTPResponseError extends Error {
-  constructor(res, ...args) {
-    super(`HTTP Error Response: ${res.status} ${res.statusText}`, ...args);
-    this.response = res;
-  }
-}
-
-const checkStatus = response => {
-  if (response.ok) return response;
-  throw new HTTPResponseError(response);
-};
+const { allowedHosts } = require('../utils/embed-generator');
 
 const newEvents = [];
-
-const allowedHosts = [
-  'atcoder.jp',
-  'open.kattis.com',
-  'icfpcontest.org',
-  'leetcode.com',
-  'hackerrank.com',
-  'adventofcode.com',
-  'spoj.com',
-  'tlx.toki.id',
-  'topcoder.com',
-  'codeforces.com',
-  'codingame.com',
-  'russianaicup.ru',
-  'dmoj.ca',
-  'bubblecup.org',
-  'codeforces.com/gyms',
-  'projecteuler.net',
-  'facebook.com/hackercup',
-  'ctftime.org',
-  'kaggle.com',
-  'e-olymp.com',
-  'codechef.com',
-  'codingcompetitions.withgoogle.com',
-  'codility.com',
-  'azspcs.net',
-  'hackerearth.com',
-  'devfolio.co',
-  'devpost.com'
-];
 
 const storeIfNotExists = async event => {
   if (!allowedHosts.includes(event.host)) return;
@@ -79,22 +38,16 @@ const storeIfNotExists = async event => {
    * Fetch data from CLIST and store in MongoDB
    */
 
-  const clistURL = new URL('https://clist.by/api/v1/contest/');
-
-  clistURL.search = new URLSearchParams({
-    limit: 1024,
-    start__gt: new Date().toISOString()
-  });
-
-  const clistRes = await fetch(clistURL, {
-    headers: { Authorization: process.env.CLIST_BEARER }
-  });
-
-  checkStatus(clistRes);
-  const clistJSON = await clistRes.json();
+  const clist = await got('https://clist.by/api/v1/contest/', {
+    headers: { Authorization: process.env.CLIST_BEARER },
+    searchParams: {
+      limit: 1024,
+      start__gt: new Date().toISOString()
+    }
+  }).json();
 
   await Promise.all(
-    clistJSON.objects
+    clist.objects
       .filter(({ event }) => /^[ -~]+$/.test(event))
       .map(e => ({
         title: e.event,
@@ -110,20 +63,16 @@ const storeIfNotExists = async event => {
    * Fetch data from Devfolio and store in MongoDB
    */
 
-  const devfolioURL = new URL('https://devfolio.co/api/hackathons');
-
-  devfolioURL.search = new URLSearchParams({
-    filter: 'all',
-    page: 1,
-    limit: 20
-  });
-
-  const devfolioRes = await fetch(devfolioURL);
-  checkStatus(devfolioRes);
-  const devfolioJSON = await devfolioRes.json();
+  const devfolio = await got('https://devfolio.co/api/hackathons', {
+    searchParams: {
+      filter: 'all',
+      page: 1,
+      limit: 20
+    }
+  }).json();
 
   await Promise.all(
-    devfolioJSON.result
+    devfolio.result
       .filter(({ starts_at }) => starts_at > new Date().toISOString())
       .reduce(
         (r, e) =>
