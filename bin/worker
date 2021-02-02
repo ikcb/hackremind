@@ -2,16 +2,18 @@
 
 const got = require('got');
 const { connect, connection } = require('mongoose');
-const { JSDOM } = require('jsdom');
+// const { JSDOM } = require('jsdom');
 require('dotenv').config();
 
 const Event = require('../models/event.model');
-const { allowedHosts } = require('../utils/embed-generator');
+const { allowedHosts, limitedEmbedGen } = require('../utils/embed-generator');
+
+process.on('warning', e => console.warn(e.stack));
 
 const newEvents = [];
 
 const storeIfNotExists = async event => {
-  if (!allowedHosts.includes(event.host)) return;
+  if (!Object.prototype.hasOwnProperty.call(allowedHosts, event.host)) return;
 
   const res = await Event.findOneAndUpdate(
     event,
@@ -41,8 +43,10 @@ const storeIfNotExists = async event => {
   const clist = await got('https://clist.by/api/v1/contest/', {
     headers: { Authorization: process.env.CLIST_BEARER },
     searchParams: {
-      limit: 1024,
-      start__gt: new Date().toISOString()
+      start__gt: new Date().toISOString(),
+      end__lt: new Date(
+        new Date().setMonth(new Date().getMonth() + 1)
+      ).toISOString()
     }
   }).json();
 
@@ -59,112 +63,125 @@ const storeIfNotExists = async event => {
       .map(storeIfNotExists)
   );
 
-  /**
-   * Fetch data from Devfolio and store in MongoDB
-   */
+  // /**
+  //  * Fetch data from Devfolio and store in MongoDB
+  //  */
 
-  const devfolio = await got('https://devfolio.co/api/hackathons', {
-    searchParams: {
-      filter: 'all',
-      page: 1,
-      limit: 20
-    }
+  // const devfolio = await got('https://devfolio.co/api/hackathons', {
+  //   searchParams: {
+  //     filter: 'all',
+  //     page: 1,
+  //     limit: 20
+  //   }
+  // }).json();
+
+  // await Promise.all(
+  //   devfolio.result
+  //     .filter(({ starts_at }) => starts_at > new Date().toISOString())
+  //     .reduce(
+  //       (r, e) =>
+  //         r.push(
+  //           {
+  //             title: `${e.name} - Apply Now`,
+  //             host: 'devfolio.co',
+  //             url: e.hackathon_setting.site,
+  //             start: e.hackathon_setting.reg_starts_at,
+  //             end: e.hackathon_setting.reg_ends_at
+  //           },
+  //           {
+  //             title: `${e.name} - Participate`,
+  //             host: 'devfolio.co',
+  //             url: e.hackathon_setting.site,
+  //             start: e.starts_at,
+  //             end: e.ends_at
+  //           }
+  //         ) && r,
+  //       []
+  //     )
+  //     .map(storeIfNotExists)
+  // );
+
+  // /**
+  //  * Fetch data from Devpost and store in MongoDB
+  //  */
+
+  // const devpostURLs = new Set();
+  // const devpostObjects = [];
+
+  // await Promise.all(
+  //   Array.from({ length: 5 }, (_, i) => i + 1).map(async page => {
+  //     const endpoint = new URL('https://devpost.com/hackathons');
+  //     endpoint.search = new URLSearchParams({
+  //       challenge_type: 'all',
+  //       page,
+  //       sort_by: 'Prize Amount',
+  //       utf8: '✓'
+  //     });
+
+  //     const dom = await JSDOM.fromURL(endpoint);
+
+  //     dom.window.document.body.innerHTML
+  //       .match(/https:\/\/([-\w]+)\.devpost\.com\//g)
+  //       .forEach(e => devpostURLs.add(e));
+
+  //     devpostObjects.push(
+  //       ...Object.values(
+  //         JSON.parse(
+  //           dom.window.document
+  //             .querySelector('#challenges-json-ld')
+  //             .textContent.trim()
+  //         )
+  //       )
+  //     );
+  //   })
+  // );
+
+  // ['secure', 'post', 'info', 'help', 'api'].forEach(e =>
+  //   devpostURLs.delete(`https://${e}.devpost.com/`)
+  // );
+
+  // devpostObjects.forEach(e => devpostURLs.delete(e.url));
+
+  // await Promise.all(
+  //   [...devpostURLs].map(async url => {
+  //     const dom = await JSDOM.fromURL(url);
+
+  //     devpostObjects.push(
+  //       JSON.parse(
+  //         dom.window.document
+  //           .querySelector('#challenge-json-ld')
+  //           .textContent.trim()
+  //       )
+  //     );
+  //   })
+  // );
+
+  // await Promise.all(
+  //   devpostObjects
+  //     .map(e => ({
+  //       title: e.name,
+  //       host: 'devpost.com',
+  //       url: e.url,
+  //       start: e.startDate,
+  //       end: e.endDate
+  //     }))
+  //     .map(storeIfNotExists)
+  // );
+
+  console.log(newEvents.length);
+
+  const { objects } = await got('https://clist.by/api/v1/resource/', {
+    headers: { Authorization: process.env.CLIST_BEARER }
   }).json();
 
-  await Promise.all(
-    devfolio.result
-      .filter(({ starts_at }) => starts_at > new Date().toISOString())
-      .reduce(
-        (r, e) =>
-          r.push(
-            {
-              title: `${e.name} - Apply Now`,
-              host: 'devfolio.co',
-              url: e.hackathon_setting.site,
-              start: e.hackathon_setting.reg_starts_at,
-              end: e.hackathon_setting.reg_ends_at
-            },
-            {
-              title: `${e.name} - Participate`,
-              host: 'devfolio.co',
-              url: e.hackathon_setting.site,
-              start: e.starts_at,
-              end: e.ends_at
-            }
-          ) && r,
-        []
-      )
-      .map(storeIfNotExists)
+  const resources = objects.map(e => {
+    e.icon = `https://clist.by${e.icon}`;
+    return e;
+  });
+
+  console.log(
+    await Promise.all(newEvents.map(e => limitedEmbedGen(e, resources)))
   );
-
-  /**
-   * Fetch data from Devpost and store in MongoDB
-   */
-
-  const devpostURLs = new Set();
-  const devpostObjects = [];
-
-  await Promise.all(
-    Array.from({ length: 5 }, (_, i) => i + 1).map(async page => {
-      const endpoint = new URL('https://devpost.com/hackathons');
-      endpoint.search = new URLSearchParams({
-        challenge_type: 'all',
-        page,
-        sort_by: 'Prize Amount',
-        utf8: '✓'
-      });
-
-      const dom = await JSDOM.fromURL(endpoint);
-
-      dom.window.document.body.innerHTML
-        .match(/https:\/\/([-\w]+)\.devpost\.com\//g)
-        .forEach(e => devpostURLs.add(e));
-
-      devpostObjects.push(
-        ...Object.values(
-          JSON.parse(
-            dom.window.document
-              .querySelector('#challenges-json-ld')
-              .textContent.trim()
-          )
-        )
-      );
-    })
-  );
-
-  ['secure', 'post', 'info', 'help', 'api'].forEach(e =>
-    devpostURLs.delete(`https://${e}.devpost.com/`)
-  );
-
-  devpostObjects.forEach(e => devpostURLs.delete(e.url));
-
-  await Promise.all(
-    [...devpostURLs].map(async url => {
-      const dom = await JSDOM.fromURL(url);
-
-      devpostObjects.push(
-        JSON.parse(
-          dom.window.document
-            .querySelector('#challenge-json-ld')
-            .textContent.trim()
-        )
-      );
-    })
-  );
-
-  await Promise.all(
-    devpostObjects
-      .map(e => ({
-        title: e.name,
-        host: 'devpost.com',
-        url: e.url,
-        start: e.startDate,
-        end: e.endDate
-      }))
-      .map(storeIfNotExists)
-  );
-
-  // console.log(newEvents);
 
   await connection.close();
   process.exit();
