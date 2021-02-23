@@ -18,7 +18,7 @@ process.on('warning', e => console.warn(e.stack));
 const newEvents = [];
 
 const storeIfNotExists = async event => {
-  if (!Object.prototype.hasOwnProperty.call(allowedHosts, event.host)) return;
+  if (!allowedHosts[event.host]) return;
 
   const res = await Event.findOneAndUpdate(
     event,
@@ -50,7 +50,7 @@ const storeIfNotExists = async event => {
     searchParams: {
       start__gt: new Date().toISOString(),
       start__lt: new Date(
-        new Date().setDate(new Date().getDate() + 7)
+        new Date().setDate(new Date().getDate() + 5)
       ).toISOString()
     }
   }).json();
@@ -196,10 +196,8 @@ const storeIfNotExists = async event => {
 
   embeds.forEach((element, i) => {
     if (!element.color)
-      embeds[Number(i)].color =
-        colors[
-          String(psl.parse(new URL(element.author.url).hostname).domain)
-        ] || 0;
+      embeds[i].color =
+        colors[psl.parse(new URL(element.author.url).hostname).domain] || 0;
   });
 
   embeds.sort(

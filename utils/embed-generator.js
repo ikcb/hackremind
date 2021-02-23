@@ -37,30 +37,30 @@ const allowedHosts = {
 const colors = {};
 
 const generateColor = async url => {
-  if (!Object.prototype.hasOwnProperty.call(colors, url))
+  if (!colors[url])
     try {
       const image = await captureWebsite.buffer(url);
       const pallette = await Vibrant.from(image).getPalette();
-      colors[String(url)] = parseInt(pallette.Vibrant.hex.slice(1), 16);
+      colors[url] = parseInt(pallette.Vibrant.hex.slice(1), 16);
     } catch {
       // console.warn(url);
       return 0;
     }
-  return colors[String(url)];
+  return colors[url];
 };
 
 const hosts = {};
 
 const generateURL = async (host, url) => {
   if (!url.includes(host)) return new URL(url).origin;
-  if (!Object.prototype.hasOwnProperty.call(hosts, host))
+  if (!hosts[host])
     try {
       const { url: hostURL } = await got(`https://${host}`);
-      hosts[String(host)] = hostURL;
+      hosts[host] = hostURL;
     } catch {
-      hosts[String(host)] = `http://${host}`;
+      hosts[host] = `http://${host}`;
     }
-  return hosts[String(host)];
+  return hosts[host];
 };
 
 const generateEmbed = async ({ title, host, url, start }, resources) => ({
@@ -68,7 +68,7 @@ const generateEmbed = async ({ title, host, url, start }, resources) => ({
   url,
   color: await generateColor(url),
   author: {
-    name: allowedHosts[String(host)],
+    name: allowedHosts[host],
     url: await generateURL(host, url),
     icon_url: resources.find(o => o.name === host).icon
   },
@@ -82,14 +82,12 @@ const getColors = () => {
   const result = {};
   Object.entries(colors).forEach(([key, value]) => {
     const { domain: host } = psl.parse(new URL(key).hostname);
-    !Object.prototype.hasOwnProperty.call(result, host)
-      ? (result[String(host)] = [value])
-      : result[String(host)].push(value);
+    !result[host] ? (result[host] = [value]) : result[host].push(value);
   });
   const avg = arr =>
     Math.round(arr.reduce((a, b) => a + b, 0) / arr.length || 0);
   Object.keys(result).forEach(key => {
-    result[String(key)] = avg(result[String(key)]);
+    result[key] = avg(result[key]);
   });
   return result;
 };
