@@ -63,14 +63,16 @@ const generateURL = async (host, url) => {
   return hosts[host];
 };
 
-const generateEmbed = async ({ title, host, url, start }, resources) => ({
+const generateEmbed = async ({ title, host, url, start }) => ({
   title,
   url,
   color: await generateColor(url),
   author: {
     name: allowedHosts[host],
     url: await generateURL(host, url),
-    icon_url: resources.find(o => o.name === host).icon
+    icon_url: `${process.env.ICONS_URL}${
+      process.env.ICONS_URL.endsWith('/') ? '' : '/'
+    }${host.replace(/\.|\//g, '_')}.png`
   },
   timestamp: start
 });

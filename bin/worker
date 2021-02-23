@@ -179,19 +179,7 @@ const storeIfNotExists = async event => {
 
   console.info(newEvents.length);
 
-  const { objects } = await got('https://clist.by/api/v1/resource/', {
-    headers: { Authorization: process.env.CLIST_BEARER }
-  }).json();
-
-  const resources = objects.map(e => {
-    e.icon = `https://clist.by${e.icon}`;
-    return e;
-  });
-
-  const embeds = await Promise.all(
-    newEvents.map(e => limitedEmbedGen(e, resources))
-  );
-
+  const embeds = await Promise.all(newEvents.map(limitedEmbedGen));
   const colors = getColors();
 
   embeds.forEach((element, i) => {
