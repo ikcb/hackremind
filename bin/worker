@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 
 const got = require('got');
+const psl = require('psl');
 const { connect, connection } = require('mongoose');
 // const { JSDOM } = require('jsdom');
 require('dotenv').config();
 
 const Event = require('../models/event.model');
-const { allowedHosts, limitedEmbedGen } = require('../utils/embed-generator');
+const {
+  allowedHosts,
+  limitedEmbedGen,
+  getColors
+} = require('../utils/embed-generator');
 
 process.on('warning', e => console.warn(e.stack));
 
@@ -44,7 +49,7 @@ const storeIfNotExists = async event => {
     headers: { Authorization: process.env.CLIST_BEARER },
     searchParams: {
       start__gt: new Date().toISOString(),
-      end__lt: new Date(
+      start__lt: new Date(
         new Date().setMonth(new Date().getMonth() + 1)
       ).toISOString()
     }
@@ -168,7 +173,11 @@ const storeIfNotExists = async event => {
   //     .map(storeIfNotExists)
   // );
 
-  console.log(newEvents.length);
+  /**
+   * Generate and sanitize embeds
+   */
+
+  console.info(newEvents.length);
 
   const { objects } = await got('https://clist.by/api/v1/resource/', {
     headers: { Authorization: process.env.CLIST_BEARER }
@@ -179,9 +188,35 @@ const storeIfNotExists = async event => {
     return e;
   });
 
-  console.log(
-    await Promise.all(newEvents.map(e => limitedEmbedGen(e, resources)))
+  const embeds = await Promise.all(
+    newEvents.map(e => limitedEmbedGen(e, resources))
   );
+
+  const colors = getColors();
+
+  embeds.forEach((element, i) => {
+    if (!element.color)
+      embeds[i].color =
+        colors[psl.parse(new URL(element.author.url).hostname).domain] || 0;
+  });
+
+  embeds.sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
+
+  const [saved, removed] = embeds.reduce(
+    (result, element, i) => {
+      !/hiring/i.test(element.title) && element.color
+        ? result[0].push(element)
+        : result[1].push(element);
+
+      return result;
+    },
+    [[], []]
+  );
+
+  console.log(saved);
+  console.warn(removed);
 
   await connection.close();
   process.exit();

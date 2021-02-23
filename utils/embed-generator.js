@@ -1,6 +1,7 @@
 const captureWebsite = require('capture-website');
 const got = require('got');
 const pLimit = require('p-limit');
+const psl = require('psl');
 const Vibrant = require('node-vibrant');
 
 const allowedHosts = {
@@ -51,8 +52,7 @@ const generateColor = async url => {
 const hosts = {};
 
 const generateURL = async (host, url) => {
-  const eventURL = new URL(url);
-  if (eventURL.host !== host) return eventURL.origin;
+  if (!url.includes(host)) return new URL(url).origin;
   if (!Object.prototype.hasOwnProperty.call(hosts, host))
     try {
       const { url: hostURL } = await got(`https://${host}`);
@@ -78,7 +78,24 @@ const generateEmbed = async ({ title, host, url, start }, resources) => ({
 const limit = pLimit(4);
 const limitedEmbedGen = (...args) => limit(generateEmbed, ...args);
 
+const getColors = () => {
+  const result = {};
+  Object.entries(colors).forEach(([key, value]) => {
+    const { domain: host } = psl.parse(new URL(key).hostname);
+    !Object.prototype.hasOwnProperty.call(result, host)
+      ? (result[String(host)] = [value])
+      : result[String(host)].push(value);
+  });
+  const avg = arr =>
+    Math.round(arr.reduce((a, b) => a + b, 0) / arr.length || 0);
+  Object.keys(result).forEach(key => {
+    result[String(key)] = avg(result[String(key)]);
+  });
+  return result;
+};
+
 module.exports = {
   allowedHosts,
-  limitedEmbedGen
+  limitedEmbedGen,
+  getColors
 };
