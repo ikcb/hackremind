@@ -74,7 +74,11 @@ const generateEmbed = async ({ title, host, url, start }) => ({
       process.env.ICONS_URL.endsWith('/') ? '' : '/'
     }${host.replace(/\.|\//g, '_')}.png`
   },
-  timestamp: start
+  timestamp: start,
+  image: {
+    url:
+      'https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png'
+  }
 });
 
 const limit = pLimit(4);
