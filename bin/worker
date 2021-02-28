@@ -218,7 +218,7 @@ const storeIfNotExists = async event => {
   const failed = [];
 
   while (saved.length > 0) {
-    webhook.embeds = saved.splice(0, 10);
+    webhook.embeds = saved.splice(0, 1);
     try {
       // eslint-disable-next-line no-await-in-loop
       await got.post(process.env.WEBHOOK_URL, {

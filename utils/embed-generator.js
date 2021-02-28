@@ -36,11 +36,21 @@ const allowedHosts = {
 
 const colors = {};
 
+const filter = (r, g, b, a) =>
+  ![
+    [114, 137, 218],
+    [255, 255, 255],
+    [153, 170, 181],
+    [44, 47, 51],
+    [35, 39, 42],
+    [0, 0, 0]
+  ].some(c => [r, g, b].every((v, i) => v === c[i]));
+
 const generateColor = async url => {
   if (!colors[url])
     try {
       const image = await captureWebsite.buffer(url);
-      const pallette = await Vibrant.from(image).getPalette();
+      const pallette = await Vibrant.from(image).addFilter(filter).getPalette();
       colors[url] = parseInt(pallette.Vibrant.hex.slice(1), 16);
     } catch {
       // console.warn(url);
