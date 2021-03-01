@@ -68,43 +68,37 @@ const storeIfNotExists = async event => {
       .map(storeIfNotExists)
   );
 
-  // /**
-  //  * Fetch data from Devfolio and store in MongoDB
-  //  */
+  /**
+   * Fetch data from Devfolio and store in MongoDB
+   */
 
-  // const devfolio = await got('https://devfolio.co/api/hackathons', {
-  //   searchParams: {
-  //     filter: 'all',
-  //     page: 1,
-  //     limit: 20
-  //   }
-  // }).json();
+  const devfolio = await got('https://devfolio.co/api/hackathons', {
+    searchParams: {
+      filter: 'application_open',
+      page: 1,
+      limit: 20
+    }
+  }).json();
 
-  // await Promise.all(
-  //   devfolio.result
-  //     .filter(({ starts_at }) => starts_at > new Date().toISOString())
-  //     .reduce(
-  //       (r, e) =>
-  //         r.push(
-  //           {
-  //             title: `${e.name} - Apply Now`,
-  //             host: 'devfolio.co',
-  //             url: e.hackathon_setting.site,
-  //             start: e.hackathon_setting.reg_starts_at,
-  //             end: e.hackathon_setting.reg_ends_at
-  //           },
-  //           {
-  //             title: `${e.name} - Participate`,
-  //             host: 'devfolio.co',
-  //             url: e.hackathon_setting.site,
-  //             start: e.starts_at,
-  //             end: e.ends_at
-  //           }
-  //         ) && r,
-  //       []
-  //     )
-  //     .map(storeIfNotExists)
-  // );
+  await Promise.all(
+    devfolio.result
+      .filter(
+        ({ hackathon_setting: hs }) =>
+          new Date(hs.reg_ends_at) <
+          new Date(new Date().setDate(new Date().getDate() + 5))
+      )
+      .map(e => ({
+        title: e.name,
+        description: e.desc,
+        host: 'devfolio.co',
+        url: `https://${e.hackathon_setting.subdomain}.devfolio.co`,
+        start: e.hackathon_setting.reg_starts_at,
+        end: e.hackathon_setting.reg_ends_at,
+        image: e.cover_img,
+        thumbnail: e.hackathon_setting.logo
+      }))
+      .map(storeIfNotExists)
+  );
 
   // /**
   //  * Fetch data from Devpost and store in MongoDB
