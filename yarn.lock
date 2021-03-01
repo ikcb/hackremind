@@ -2571,9 +2571,10 @@ node-fetch@^2.6.1:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
-node-vibrant@iiitkota-codebase/node-vibrant:
-  version "3.1.5"
-  resolved "https://codeload.github.com/iiitkota-codebase/node-vibrant/tar.gz/279d52f99dba0cfe3564a3719efee07283f1dad7"
+node-vibrant@3.1.6:
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/node-vibrant/-/node-vibrant-3.1.6.tgz#8554c3108903232cbe1e722f928469ee4379aa18"
+  integrity sha512-Wlc/hQmBMOu6xon12ZJHS2N3M+I6J8DhrD3Yo6m5175v8sFkVIN+UjhKVRcO+fqvre89ASTpmiFEP3nPO13SwA==
   dependencies:
     "@jimp/custom" "^0.16.1"
     "@jimp/plugin-resize" "^0.16.1"
