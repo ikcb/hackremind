@@ -45,7 +45,7 @@ const storeIfNotExists = async event => {
    * Fetch data from CLIST and store in MongoDB
    */
 
-  const clist = await got('https://clist.by/api/v1/contest/', {
+  const clist = await got('https://clist.by/api/v2/contest/', {
     headers: { Authorization: process.env.CLIST_BEARER },
     searchParams: {
       start__gt: new Date().toISOString(),
@@ -60,7 +60,7 @@ const storeIfNotExists = async event => {
       .filter(({ event }) => /^[ -~]+$/.test(event))
       .map(e => ({
         title: e.event,
-        host: e.resource.name,
+        host: e.resource,
         url: e.href,
         start: e.start,
         end: e.end
@@ -173,7 +173,9 @@ const storeIfNotExists = async event => {
 
   console.info(newEvents.length);
 
-  const embeds = await Promise.all(newEvents.map(limitedEmbedGen));
+  const embeds = await Promise.all(
+    newEvents.filter(e => !/hiring/i.test(e.title)).map(limitedEmbedGen)
+  );
   const colors = getColors();
 
   embeds.forEach((element, i) => {
@@ -186,20 +188,6 @@ const storeIfNotExists = async event => {
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
 
-  const [saved, removed] = embeds.reduce(
-    (result, element) => {
-      !/hiring/i.test(element.title) && element.color
-        ? result[0].push(element)
-        : result[1].push(element);
-
-      return result;
-    },
-    [[], []]
-  );
-
-  // console.warn(removed);
-  console.info(removed.length);
-
   /**
    * Generate and send webhooks to Discord
    */
@@ -211,18 +199,19 @@ const storeIfNotExists = async event => {
 
   const failed = [];
 
-  while (saved.length > 0) {
-    webhook.embeds = saved.splice(0, 1);
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      await got.post(process.env.WEBHOOK_URL, {
-        json: webhook,
-        responseType: 'json'
-      });
-    } catch (e) {
-      console.error(e);
-      failed.push(...webhook.embeds);
-    }
+  while (embeds.length > 0) {
+    webhook.embeds = embeds.splice(0, 1);
+    if (webhook.embeds[0].color)
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await got.post(process.env.WEBHOOK_URL, {
+          json: webhook,
+          responseType: 'json'
+        });
+      } catch (e) {
+        console.error(e);
+        failed.push(...webhook.embeds);
+      }
   }
 
   console.warn(failed);

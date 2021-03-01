@@ -28,6 +28,7 @@ const allowedHosts = {
   'leetcode.com': 'LeetCode',
   'open.kattis.com': 'Kattis',
   'projecteuler.net': 'Project Euler',
+  'quora.com': 'Quora',
   'russianaicup.ru': 'Russian AI Cup',
   'spoj.com': 'Sphere Online Judge (SPOJ)',
   'tlx.toki.id': 'TLX',
