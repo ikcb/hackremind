@@ -2,8 +2,9 @@
 
 const got = require('got');
 const psl = require('psl');
+const TurndownService = require('turndown');
 const { connect, connection } = require('mongoose');
-// const { JSDOM } = require('jsdom');
+const { JSDOM } = require('jsdom');
 require('dotenv').config();
 
 const Event = require('../models/event.model');
@@ -104,68 +105,63 @@ const storeIfNotExists = async event => {
   //  * Fetch data from Devpost and store in MongoDB
   //  */
 
-  // const devpostURLs = new Set();
-  // const devpostObjects = [];
+  const fetchData = async (url, searchParams, page = 1) => {
+    const data = await got(url, {
+      searchParams: Object.assign(searchParams, { page })
+    }).json();
 
-  // await Promise.all(
-  //   Array.from({ length: 5 }, (_, i) => i + 1).map(async page => {
-  //     const endpoint = new URL('https://devpost.com/hackathons');
-  //     endpoint.search = new URLSearchParams({
-  //       challenge_type: 'all',
-  //       page,
-  //       sort_by: 'Prize Amount',
-  //       utf8: '✓'
-  //     });
+    const { total_count: totalCount, per_page: perPage } = data.meta;
+    if (perPage * page >= totalCount) return data.hackathons;
+    return [
+      ...data.hackathons,
+      ...(await fetchData(url, searchParams, page + 1))
+    ];
+  };
 
-  //     const dom = await JSDOM.fromURL(endpoint);
+  const parseDate = str => {
+    const matches = /^(\w{3})\s(\d{2}).*?(\d{4})/.exec(str);
+    return new Date([...matches].splice(1).join(' '));
+  };
 
-  //     dom.window.document.body.innerHTML
-  //       .match(/https:\/\/([-\w]+)\.devpost\.com\//g)
-  //       .forEach(e => devpostURLs.add(e));
+  const devpost = (
+    await fetchData('https://devpost.com/api/hackathons', {
+      challenge_type: 'online',
+      order_by: 'recently-added',
+      status: 'upcoming'
+    })
+  ).filter(
+    e =>
+      parseDate(e.submission_period_dates) <
+      new Date(new Date().setDate(new Date().getDate() + 7))
+  );
 
-  //     devpostObjects.push(
-  //       ...Object.values(
-  //         JSON.parse(
-  //           dom.window.document
-  //             .querySelector('#challenges-json-ld')
-  //             .textContent.trim()
-  //         )
-  //       )
-  //     );
-  //   })
-  // );
+  const getHackathonDetails = async url => {
+    const dom = await JSDOM.fromURL(url);
+    return JSON.parse(
+      dom.window.document.querySelector('#challenge-json-ld').textContent
+    );
+  };
 
-  // ['secure', 'post', 'info', 'help', 'api'].forEach(e =>
-  //   devpostURLs.delete(`https://${e}.devpost.com/`)
-  // );
+  const sanitizeText = async txt =>
+    new TurndownService().turndown(
+      new JSDOM(txt).window.document.body.textContent
+    );
 
-  // devpostObjects.forEach(e => devpostURLs.delete(e.url));
-
-  // await Promise.all(
-  //   [...devpostURLs].map(async url => {
-  //     const dom = await JSDOM.fromURL(url);
-
-  //     devpostObjects.push(
-  //       JSON.parse(
-  //         dom.window.document
-  //           .querySelector('#challenge-json-ld')
-  //           .textContent.trim()
-  //       )
-  //     );
-  //   })
-  // );
-
-  // await Promise.all(
-  //   devpostObjects
-  //     .map(e => ({
-  //       title: e.name,
-  //       host: 'devpost.com',
-  //       url: e.url,
-  //       start: e.startDate,
-  //       end: e.endDate
-  //     }))
-  //     .map(storeIfNotExists)
-  // );
+  await Promise.all(
+    devpost.map(async e => {
+      const data = await getHackathonDetails(e.url);
+      await storeIfNotExists({
+        title: e.title,
+        description: await sanitizeText(data.description),
+        host: 'devpost.com',
+        url: e.url,
+        start: data.startDate,
+        end: data.endDate,
+        image: data.image,
+        thumbnail: `https:${e.thumbnail_url}`
+      });
+    })
+  );
 
   /**
    * Generate and sanitize embeds
