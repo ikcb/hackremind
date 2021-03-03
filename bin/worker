@@ -30,6 +30,8 @@ const storeIfNotExists = async event => {
   res.lastErrorObject.updatedExisting || newEvents.push(res.value);
 };
 
+const beforeDate = new Date(new Date().setDate(new Date().getDate() + 5));
+
 (async () => {
   /**
    * Connect to MongoDB instance
@@ -50,9 +52,7 @@ const storeIfNotExists = async event => {
     headers: { Authorization: process.env.CLIST_BEARER },
     searchParams: {
       start__gt: new Date().toISOString(),
-      start__lt: new Date(
-        new Date().setDate(new Date().getDate() + 5)
-      ).toISOString()
+      start__lt: beforeDate.toISOString()
     }
   }).json();
 
@@ -84,9 +84,7 @@ const storeIfNotExists = async event => {
   await Promise.all(
     devfolio.result
       .filter(
-        ({ hackathon_setting: hs }) =>
-          new Date(hs.reg_ends_at) <
-          new Date(new Date().setDate(new Date().getDate() + 5))
+        ({ hackathon_setting: hs }) => new Date(hs.reg_ends_at) < beforeDate
       )
       .map(e => ({
         title: e.name,
@@ -101,9 +99,9 @@ const storeIfNotExists = async event => {
       .map(storeIfNotExists)
   );
 
-  // /**
-  //  * Fetch data from Devpost and store in MongoDB
-  //  */
+  /**
+   * Fetch data from Devpost and store in MongoDB
+   */
 
   const fetchData = async (url, searchParams, page = 1) => {
     const data = await got(url, {
@@ -129,11 +127,7 @@ const storeIfNotExists = async event => {
       order_by: 'recently-added',
       status: 'upcoming'
     })
-  ).filter(
-    e =>
-      parseDate(e.submission_period_dates) <
-      new Date(new Date().setDate(new Date().getDate() + 7))
-  );
+  ).filter(e => parseDate(e.submission_period_dates) < beforeDate);
 
   const getHackathonDetails = async url => {
     const dom = await JSDOM.fromURL(url);
@@ -158,7 +152,7 @@ const storeIfNotExists = async event => {
         start: data.startDate,
         end: data.endDate,
         image: data.image,
-        thumbnail: `https:${e.thumbnail_url}`
+        thumbnail: `https://${e.thumbnail_url.replace(/(^\w+:|^)\/\//, '')}`
       });
     })
   );
@@ -193,7 +187,7 @@ const storeIfNotExists = async event => {
     embeds: []
   };
 
-  const failed = [];
+  const failed = embeds.splice(30);
 
   while (embeds.length > 0) {
     webhook.embeds = embeds.splice(0, 1);

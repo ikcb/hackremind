@@ -1,6 +1,7 @@
 const captureWebsite = require('capture-website');
 const got = require('got');
 const pLimit = require('p-limit');
+const probe = require('probe-image-size');
 const psl = require('psl');
 const Vibrant = require('node-vibrant');
 
@@ -89,6 +90,16 @@ const checkRegistration = (title, host) =>
 const truncate = (s, n) =>
   s && (s.length > n ? `${s.substring(0, n - 1)}\u2026` : s);
 
+const fixImageWidth = async img => {
+  let url =
+    'https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png';
+  if (img && img.length > 0 && !img.toLowerCase().includes('placeholder')) {
+    const dim = await probe(img);
+    url = dim.width / dim.height < 4 / 3 || dim.width < 432 ? url : img;
+  }
+  return { url };
+};
+
 const generateEmbed = async e => ({
   title: truncate(e.title, 256),
   description: truncate(e.description, 2048),
@@ -102,11 +113,7 @@ const generateEmbed = async e => ({
     }${e.host.replace(/\.|\//g, '_')}.png`
   },
   timestamp: checkRegistration(e.title.toLowerCase(), e.host) ? e.end : e.start,
-  image: {
-    url:
-      e.image ||
-      'https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png'
-  },
+  image: await fixImageWidth(e.image),
   thumbnail: {
     url: e.thumbnail
   }
