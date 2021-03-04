@@ -1,9 +1,13 @@
 const captureWebsite = require('capture-website');
+const cheerio = require('cheerio');
 const got = require('got');
 const pLimit = require('p-limit');
 const probe = require('probe-image-size');
 const psl = require('psl');
+const truncate = require('markdown-truncate');
+const TurndownService = require('turndown');
 const Vibrant = require('node-vibrant');
+const { gfm } = require('turndown-plugin-gfm');
 
 const allowedHosts = {
   'adventofcode.com': 'Advent of Code',
@@ -87,7 +91,7 @@ const generateHost = async (host, url) => {
 const checkRegistration = (title, host) =>
   ['devfolio.co'].includes(host) || regWords.some(s => title.includes(s));
 
-const truncate = (s, n) =>
+const hardTruncate = (s, n) =>
   s && (s.length > n ? `${s.substring(0, n - 1)}\u2026` : s);
 
 const fixImageWidth = async img => {
@@ -100,13 +104,82 @@ const fixImageWidth = async img => {
   return { url };
 };
 
+const turndownService = new TurndownService({
+  codeBlockStyle: 'fenced',
+  bulletListMarker: '\u2022'
+})
+  .use(gfm)
+  .addRule('strikethrough', {
+    filter: ['del', 's', 'strike'],
+    replacement: content => `~~${content}~~`
+  })
+  .addRule('underline', {
+    filter: ['u'],
+    replacement: content => `__${content}__`
+  })
+  .addRule('heading', {
+    filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+    replacement: content => `\n\n> __**${content}**__ `
+  });
+
+const fixTables = content => {
+  const $ = cheerio.load(content);
+
+  $('table').each((index, el) => {
+    const myTable = $(el);
+
+    myTable.find('p').each(function () {
+      $(this).replaceWith($(this).html());
+    });
+
+    let thead = myTable.find('thead');
+    let tbody = myTable.find('tbody');
+
+    const thRows = myTable.find('tr:has(th)');
+    const tdRows = myTable.find('tr:has(td)');
+
+    if (thead.length === 0) thead = $('<thead></thead>').prependTo(myTable);
+
+    if (tbody.length === 0) tbody = $('<tbody></tbody>').appendTo(myTable);
+
+    thRows.clone(true).appendTo(thead);
+    thRows.remove();
+
+    tdRows.clone(true).appendTo(tbody);
+    tdRows.remove();
+
+    if (thead.find('tr').length === 0 && tbody.find('tr').length) {
+      const firstRow = tbody.find('tr').first();
+      firstRow.appendTo(thead);
+    }
+  });
+
+  return $('body').html();
+};
+
+const smartTruncate = (txt, limit, isHTML) =>
+  truncate(isHTML ? turndownService.turndown(fixTables(txt)) : txt, {
+    limit,
+    ellipsis: true
+  })
+    .replace(/[\u200B-\u200D\uFEFF]/gu, '')
+    .replace(/\n\s+\n/g, '\n\n')
+    .replace(/(?:\*\*){2,}/g, '**')
+    .replace(/\.{3}/g, '\u2026')
+    .replace(/\n\n\*\*(.+?)\*\*\n\n/g, '\n\n> __**$1**__ \n\n')
+    .replace(/> __(?![^]*> __)[^]+\u2026$/gu, '')
+    .trim();
+
 const generateEmbed = async e => ({
-  title: truncate(e.title, 256),
-  description: truncate(e.description, 2048),
+  title: hardTruncate(smartTruncate(e.title, 200), 256),
+  description: hardTruncate(
+    smartTruncate(e.description, 2000, e.host === 'devpost.com'),
+    2048
+  ),
   url: e.url,
   color: await generateColor(e.url),
   author: {
-    name: truncate(allowedHosts[e.host], 256),
+    name: hardTruncate(smartTruncate(allowedHosts[e.host], 200), 256),
     url: await generateHost(e.host, e.url),
     icon_url: `${process.env.ICONS_URL}${
       process.env.ICONS_URL.endsWith('/') ? '' : '/'
@@ -115,7 +188,10 @@ const generateEmbed = async e => ({
   timestamp: checkRegistration(e.title.toLowerCase(), e.host) ? e.end : e.start,
   image: await fixImageWidth(e.image),
   thumbnail: {
-    url: e.thumbnail
+    url:
+      e.thumbnail && e.thumbnail.toLowerCase().includes('placeholder')
+        ? undefined
+        : e.thumbnail
   }
 });
 

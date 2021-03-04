@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
+const cheerio = require('cheerio');
+const entities = require('entities');
 const got = require('got');
 const psl = require('psl');
-const TurndownService = require('turndown');
 const { connect, connection } = require('mongoose');
-const { JSDOM } = require('jsdom');
 require('dotenv').config();
 
 const Event = require('../models/event.model');
@@ -19,10 +19,17 @@ process.on('warning', e => console.warn(e.stack));
 const newEvents = [];
 
 const storeIfNotExists = async event => {
+  if (newEvents.length >= 30) return;
   if (!allowedHosts[event.host]) return;
 
   const res = await Event.findOneAndUpdate(
-    event,
+    {
+      title: event.title,
+      host: event.host,
+      url: event.url,
+      start: event.start,
+      end: event.end
+    },
     { $setOnInsert: event },
     { upsert: true, new: true, rawResult: true }
   );
@@ -30,7 +37,33 @@ const storeIfNotExists = async event => {
   res.lastErrorObject.updatedExisting || newEvents.push(res.value);
 };
 
-const beforeDate = new Date(new Date().setDate(new Date().getDate() + 5));
+const beforeDate = new Date(new Date().setDate(new Date().getDate() + 7));
+
+const fetchData = async (url, searchParams, page = 1) => {
+  const data = await got(url, {
+    searchParams: Object.assign(searchParams, { page })
+  }).json();
+
+  const { total_count: totalCount, per_page: perPage } = data.meta;
+  if (perPage * page >= totalCount) return data.hackathons;
+  return [
+    ...data.hackathons,
+    ...(await fetchData(url, searchParams, page + 1))
+  ];
+};
+
+const parseDate = str => {
+  const matches = /^(\w{3})\s(\d{2}).*?(\d{4})/.exec(str);
+  return new Date([...matches].splice(1).join(' '));
+};
+
+const getHackathonDetails = async url => {
+  const html = await got(url);
+  const $ = cheerio.load(html.body);
+  return JSON.parse($('#challenge-json-ld').html());
+};
+
+const sanitizeText = async txt => entities.decodeHTML(txt);
 
 (async () => {
   /**
@@ -103,24 +136,6 @@ const beforeDate = new Date(new Date().setDate(new Date().getDate() + 5));
    * Fetch data from Devpost and store in MongoDB
    */
 
-  const fetchData = async (url, searchParams, page = 1) => {
-    const data = await got(url, {
-      searchParams: Object.assign(searchParams, { page })
-    }).json();
-
-    const { total_count: totalCount, per_page: perPage } = data.meta;
-    if (perPage * page >= totalCount) return data.hackathons;
-    return [
-      ...data.hackathons,
-      ...(await fetchData(url, searchParams, page + 1))
-    ];
-  };
-
-  const parseDate = str => {
-    const matches = /^(\w{3})\s(\d{2}).*?(\d{4})/.exec(str);
-    return new Date([...matches].splice(1).join(' '));
-  };
-
   const devpost = (
     await fetchData('https://devpost.com/api/hackathons', {
       challenge_type: 'online',
@@ -128,18 +143,6 @@ const beforeDate = new Date(new Date().setDate(new Date().getDate() + 5));
       status: 'upcoming'
     })
   ).filter(e => parseDate(e.submission_period_dates) < beforeDate);
-
-  const getHackathonDetails = async url => {
-    const dom = await JSDOM.fromURL(url);
-    return JSON.parse(
-      dom.window.document.querySelector('#challenge-json-ld').textContent
-    );
-  };
-
-  const sanitizeText = async txt =>
-    new TurndownService().turndown(
-      new JSDOM(txt).window.document.body.textContent
-    );
 
   await Promise.all(
     devpost.map(async e => {
@@ -187,7 +190,7 @@ const beforeDate = new Date(new Date().setDate(new Date().getDate() + 5));
     embeds: []
   };
 
-  const failed = embeds.splice(30);
+  const failed = [];
 
   while (embeds.length > 0) {
     webhook.embeds = embeds.splice(0, 1);
