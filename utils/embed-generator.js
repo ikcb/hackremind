@@ -14,6 +14,7 @@ const allowedHosts = {
   'atcoder.jp': 'AtCoder',
   'azspcs.net': 'AZsPCs',
   'bubblecup.org': 'Bubble Cup',
+  'challenges.reply.com': 'Reply Challenges',
   'codechef.com': 'CodeChef',
   'codeforces.com': 'Codeforces',
   'codeforces.com/gyms': 'Gym - Codeforces',
@@ -163,11 +164,20 @@ const smartTruncate = (txt, limit, isHTML) =>
     ellipsis: true
   })
     .replace(/[\u200B-\u200D\uFEFF]/gu, '')
+    .replace(/^[\u2022*]\s+/gmu, '\u2022\u2800')
+    .replace(/(?<!~)~([^~\n]+)~(?!~)/g, '~~$1~~')
+    .replace(/^\s*#+\s*([^]+?)$/gm, '\n> __**$1**__\n')
+    .replace(/(?<=\u201c([^\u201d"]+))"/gu, '\u201d')
+    .replace(/"(?=([^\u201c"]+)\u201d)/gu, '\u201c')
     .replace(/\n\s+\n/g, '\n\n')
     .replace(/(?:\*\*){2,}/g, '**')
-    .replace(/\.{3}/g, '\u2026')
+    .replace(/\.{3,}/g, '\u2026')
     .replace(/\n\n\*\*(.+?)\*\*\n\n/g, '\n\n> __**$1**__ \n\n')
     .replace(/> __(?![^]*> __)[^]+\u2026$/gu, '')
+    // .replace(
+    //   /(?<=\w[^\S\r\n]*?[^\P{P}\u2022]*?)[^\S\r\n]*?\n[^\S\r\n]*?(?=[^\P{P}\u2022]*?[^\S\r\n]*?\w)/gu,
+    //   ' '
+    // )
     .trim();
 
 const generateEmbed = async e => ({
