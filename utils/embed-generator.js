@@ -105,33 +105,46 @@ const fixImageWidth = async img => {
   return { url };
 };
 
-const turndownService = new TurndownService({
-  codeBlockStyle: 'fenced',
-  bulletListMarker: '\u2022'
-})
-  .use(gfm)
-  .addRule('strikethrough', {
-    filter: ['del', 's', 'strike'],
-    replacement: content => `~~${content}~~`
-  })
-  .addRule('underline', {
-    filter: ['u'],
-    replacement: content => `__${content}__`
-  })
-  .addRule('heading', {
-    filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-    replacement: content => `\n\n> __**${content}**__ `
-  });
+const rules = {};
+
+rules.strikethrough = {
+  filter: ['del', 's', 'strike'],
+  replacement: content => `~~${content}~~`
+};
+
+rules.underline = {
+  filter: ['u'],
+  replacement: content => `__${content}__`
+};
+
+rules.image = {
+  filter: ['img'],
+  replacement: _ => ''
+};
+
+rules.strong = {
+  filter: ['strong', 'b'],
+  replacement: content => {
+    const txt = content.trim();
+    if (!txt) return '';
+    if (!/[a-zA-Z]/.test(txt)) return txt;
+    return `**${txt}**`;
+  }
+};
+
+const turndownService = new TurndownService({ codeBlockStyle: 'fenced' });
+turndownService.use(gfm);
+
+Object.entries(rules).forEach(([key, value]) =>
+  turndownService.addRule(key, value)
+);
 
 const fixTables = content => {
   const $ = cheerio.load(content);
 
   $('table').each((index, el) => {
     const myTable = $(el);
-
-    myTable.find('p').each(function () {
-      $(this).replaceWith($(this).html());
-    });
+    myTable.find('p').each((i, p) => $(p).replaceWith($(p).html()));
 
     let thead = myTable.find('thead');
     let tbody = myTable.find('tbody');
@@ -140,7 +153,6 @@ const fixTables = content => {
     const tdRows = myTable.find('tr:has(td)');
 
     if (thead.length === 0) thead = $('<thead></thead>').prependTo(myTable);
-
     if (tbody.length === 0) tbody = $('<tbody></tbody>').appendTo(myTable);
 
     thRows.clone(true).appendTo(thead);
@@ -158,38 +170,43 @@ const fixTables = content => {
   return $('body').html();
 };
 
-const smartTruncate = (txt, limit, isHTML) =>
-  truncate(isHTML ? turndownService.turndown(fixTables(txt)) : txt, {
-    limit,
-    ellipsis: true
-  })
-    .replace(/[\u200B-\u200D\uFEFF]/gu, '')
-    .replace(/^[\u2022*]\s+/gmu, '\u2022\u2800')
-    .replace(/(?<!~)~([^~\n]+)~(?!~)/g, '~~$1~~')
-    .replace(/^\s*#+\s*([^]+?)$/gm, '\n> __**$1**__\n')
-    .replace(/(?<=\u201c([^\u201d"]+))"/gu, '\u201d')
-    .replace(/"(?=([^\u201c"]+)\u201d)/gu, '\u201c')
-    .replace(/\n\s+\n/g, '\n\n')
-    .replace(/(?:\*\*){2,}/g, '**')
-    .replace(/\.{3,}/g, '\u2026')
-    .replace(/\n\n\*\*(.+?)\*\*\n\n/g, '\n\n> __**$1**__ \n\n')
-    .replace(/> __(?![^]*> __)[^]+\u2026$/gu, '')
-    // .replace(
-    //   /(?<=\w[^\S\r\n]*?[^\P{P}\u2022]*?)[^\S\r\n]*?\n[^\S\r\n]*?(?=[^\P{P}\u2022]*?[^\S\r\n]*?\w)/gu,
-    //   ' '
-    // )
-    .trim();
+// TODO: Analyse regex for ReDOS vulnerabilities
+const replacements = [
+  [/[\u200B-\u200D\uFEFF]/gu, ''],
+  [/^\*[^\S\r\n]+/gm, '\u2800\u2022\u2800'],
+  [/^([^\S\r\n]*?)[^\S\r\n]\*[^\S\r\n]+/gm, '$1\u2800\u2800\u25e6\u2800'],
+  [/(?<=^[^\S\r\n]*)[^\S\r\n]{2}(?=[^\S\r\n]*\u2800+\u25e6)/gmu, '\u2800'],
+  [/(?<!~)~([^~\n]+)~(?!~)/g, '~~$1~~'],
+  [/^[^\S\r\n]*?#+[^\S\r\n]*([^]+?)$/gm, '\n> __**$1**__\n'],
+  [/(?<=\u201c([^\u201d"]+))"/gu, '\u201d'],
+  [/"(?=([^\u201c"]+)\u201d)/gu, '\u201c'],
+  [/\n\s+\n/g, '\n\n'],
+  [/(?:\*\*){2,}/g, '**'],
+  [/\.{3,}/g, '\u2026'],
+  [/^[^\S\r\n]*\*\*\S(?:(?!\*\*).){1,50}\S\*\*[^\S\r\n]*$/gm, '> __$&__'],
+  [/> __(?![^]*> __)[^]+\u2026$/gu, '']
+];
+
+const smartTruncate = (txt, limit, isHTML) => {
+  const md = isHTML ? turndownService.turndown(fixTables(txt)) : txt;
+  let s = truncate(md, { limit, ellipsis: true });
+  replacements.forEach(i => {
+    const replacement = s.replace(...i);
+    if (replacement && replacement.length > 1) s = replacement;
+  });
+  return s.trim();
+};
 
 const generateEmbed = async e => ({
-  title: hardTruncate(smartTruncate(e.title, 200), 256),
+  title: hardTruncate(smartTruncate(e.title, 150), 256),
   description: hardTruncate(
-    smartTruncate(e.description, 2000, e.host === 'devpost.com'),
+    smartTruncate(e.description, 1500, e.host === 'devpost.com'),
     2048
   ),
   url: e.url,
   color: await generateColor(e.url),
   author: {
-    name: hardTruncate(smartTruncate(allowedHosts[e.host], 200), 256),
+    name: hardTruncate(smartTruncate(allowedHosts[e.host], 150), 256),
     url: await generateHost(e.host, e.url),
     icon_url: `${process.env.ICONS_URL}${
       process.env.ICONS_URL.endsWith('/') ? '' : '/'
@@ -199,7 +216,8 @@ const generateEmbed = async e => ({
   image: await fixImageWidth(e.image),
   thumbnail: {
     url:
-      e.thumbnail && e.thumbnail.toLowerCase().includes('placeholder')
+      !(e.description && e.description.length > 1) ||
+      (e.thumbnail && e.thumbnail.toLowerCase().includes('placeholder'))
         ? undefined
         : e.thumbnail
   }

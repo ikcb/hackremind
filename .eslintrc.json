@@ -1,5 +1,6 @@
 {
   "rules": {
+    "security/detect-unsafe-regex": 0,
     "security/detect-object-injection": 0,
     "no-console": 0,
     "no-unused-expressions": 0,
