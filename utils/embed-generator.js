@@ -22,6 +22,7 @@ const allowedHosts = {
   'codingame.com': 'CodinGame',
   'codingcompetitions.withgoogle.com': 'Google',
   'ctftime.org': 'CTFtime',
+  'dare2compete.com': 'Dare2Compete',
   'devfolio.co': 'Devfolio',
   'devpost.com': 'Devpost',
   'dmoj.ca': 'DMOJ: Modern Online Judge',
@@ -90,14 +91,17 @@ const generateHost = async (host, url) => {
 };
 
 const checkRegistration = (title, host) =>
-  ['devfolio.co'].includes(host) || regWords.some(s => title.includes(s));
+  ['devfolio.co', 'dare2compete.com'].includes(host) ||
+  regWords.some(s => title.includes(s));
 
 const hardTruncate = (s, n) =>
   s && (s.length > n ? `${s.substring(0, n - 1)}\u2026` : s);
 
-const fixImageWidth = async img => {
-  let url =
-    'https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png';
+const fixImageWidth = async (
+  img,
+  defaultURL = 'https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png'
+) => {
+  let url = defaultURL;
   if (img && img.length > 0 && !img.toLowerCase().includes('placeholder')) {
     const dim = await probe(img);
     url = dim.width / dim.height < 4 / 3 || dim.width < 432 ? url : img;
@@ -170,10 +174,9 @@ const fixTables = content => {
   return $('body').html();
 };
 
-// TODO: Analyse regex for ReDOS vulnerabilities
 const replacements = [
   [/[\u200B-\u200D\uFEFF]/gu, ''],
-  [/^\*[^\S\r\n]+/gm, '\u2800\u2022\u2800'],
+  [/^[*\u2022][^\S\r\n]+/gmu, '\u2800\u2022\u2800'],
   [/^([^\S\r\n]*?)[^\S\r\n]\*[^\S\r\n]+/gm, '$1\u2800\u2800\u25e6\u2800'],
   [/(?<=^[^\S\r\n]*)[^\S\r\n]{2}(?=[^\S\r\n]*\u2800+\u25e6)/gmu, '\u2800'],
   [/(?<!~)~([^~\n]+)~(?!~)/g, '~~$1~~'],
@@ -188,6 +191,7 @@ const replacements = [
 ];
 
 const smartTruncate = (txt, limit, isHTML) => {
+  if (!txt || txt.length < 1 || limit < 1) return null;
   const md = isHTML ? turndownService.turndown(fixTables(txt)) : txt;
   let s = truncate(md, { limit, ellipsis: true });
   replacements.forEach(i => {
@@ -200,7 +204,11 @@ const smartTruncate = (txt, limit, isHTML) => {
 const generateEmbed = async e => ({
   title: hardTruncate(smartTruncate(e.title, 150), 256),
   description: hardTruncate(
-    smartTruncate(e.description, 1500, e.host === 'devpost.com'),
+    smartTruncate(
+      e.description,
+      1500,
+      ['devpost.com', 'dare2compete.com'].includes(e.host)
+    ),
     2048
   ),
   url: e.url,
@@ -243,5 +251,6 @@ const getColors = () => {
 module.exports = {
   allowedHosts,
   limitedEmbedGen,
-  getColors
+  getColors,
+  fixImageWidth
 };

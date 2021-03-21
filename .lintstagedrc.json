@@ -1,7 +1,7 @@
 {
   "package.json": "prettier-package-json --write ",
-  "*.js": "eslint --fix",
-  "bin/*": "eslint --fix",
+  "*.js": "eslint --fix --max-warnings 0",
+  "bin/*": "eslint --fix --max-warnings 0",
   "*.json": ["jsonlint", "prettier --write"],
   "*.md": ["prettier --write", "markdownlint --fix"]
 }

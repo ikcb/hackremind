@@ -1,5 +1,6 @@
 {
   "rules": {
+    "no-nested-ternary": 0,
     "security/detect-unsafe-regex": 0,
     "security/detect-object-injection": 0,
     "no-console": 0,

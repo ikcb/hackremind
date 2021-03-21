@@ -11,7 +11,8 @@ const Event = require('../models/event.model');
 const {
   allowedHosts,
   limitedEmbedGen,
-  getColors
+  getColors,
+  fixImageWidth
 } = require('../utils/embed-generator');
 
 process.on('warning', e => console.warn(e.stack));
@@ -158,6 +159,51 @@ const sanitizeText = async txt => entities.decodeHTML(txt);
         thumbnail: `https://${e.thumbnail_url.replace(/(^\w+:|^)\/\//, '')}`
       });
     })
+  );
+
+  /**
+   * Fetch data from Dare2Compete and store in MongoDB
+   */
+
+  const dare2compete = await got(
+    'https://api.dare2compete.com/api/opportunity/search-new',
+    {
+      searchParams: {
+        opportunity: 'hackathons',
+        filters: ',All,Open',
+        types: 'teamsize,eligible,oppstatus'
+      }
+    }
+  ).json();
+
+  await Promise.all(
+    dare2compete.data.data
+      .filter(e => new Date(e.end_date) < beforeDate)
+      .map(async ({ id }) => {
+        const { competition } = (
+          await got(`https://dare2compete.com/api/competition/${id}`).json()
+        ).data;
+
+        const image = await fixImageWidth(
+          competition.banner.path.startsWith('uploads')
+            ? competition.banner.image_url
+            : competition.banner_mobile.path.startsWith('uploads')
+            ? competition.banner_mobile.image_url
+            : '',
+          competition.meta_info.sharable_image_url
+        );
+
+        await storeIfNotExists({
+          title: competition.title,
+          description: competition.meta_info.description || competition.details,
+          host: 'dare2compete.com',
+          url: competition.web_url || competition.seo_url,
+          start: competition.regnRequirements.start_regn_dt,
+          end: competition.regnRequirements.end_regn_dt,
+          image: image.url,
+          thumbnail: competition.logoUrl2
+        });
+      })
   );
 
   /**
