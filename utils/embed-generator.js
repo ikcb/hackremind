@@ -66,7 +66,11 @@ const filter = (r, g, b, a) =>
 const generateColor = async url => {
   if (!colors[url])
     try {
-      const image = await captureWebsite.buffer(url);
+      const image = await captureWebsite.buffer(url, {
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        }
+      });
       const pallette = await Vibrant.from(image).addFilter(filter).getPalette();
       colors[url] = parseInt(pallette.Vibrant.hex.slice(1), 16);
     } catch {
