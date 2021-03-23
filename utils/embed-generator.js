@@ -238,7 +238,7 @@ const generateEmbed = async e => ({
   }
 });
 
-const limit = pLimit(4);
+const limit = pLimit(1);
 const limitedEmbedGen = (...args) => limit(generateEmbed, ...args);
 
 const getColors = () => {
