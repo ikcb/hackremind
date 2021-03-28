@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 
+// TODO: add validation
 const eventSchema = new Schema({
   title: String,
   description: String,
@@ -11,6 +12,4 @@ const eventSchema = new Schema({
   thumbnail: String
 });
 
-const Event = model('Event', eventSchema);
-
-module.exports = Event;
+module.exports = model('Event', eventSchema);
