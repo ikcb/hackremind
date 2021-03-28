@@ -47,10 +47,7 @@ const generateEmbed = async e => {
 
 module.exports = {
   fixImageWidth,
-  generateColor,
   generateEmbed,
-  generateHost,
   generateTimestamp,
-  retrieveCachedColors,
-  truncateText
+  retrieveCachedColors
 };
