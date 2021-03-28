@@ -17,30 +17,11 @@
     "no-process-exit": 0,
     "camelcase": [
       2,
-      {
-        "properties": "never",
-        "ignoreDestructuring": true,
-        "allow": ["_at$"]
-      }
+      { "properties": "never", "ignoreDestructuring": true, "allow": ["_at$"] }
     ],
-    "no-plusplus": [
-      2,
-      {
-        "allowForLoopAfterthoughts": true
-      }
-    ],
-    "no-unused-vars": [
-      2,
-      {
-        "args": "none"
-      }
-    ],
-    "autofix/no-unused-vars": [
-      2,
-      {
-        "args": "none"
-      }
-    ],
+    "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
+    "no-unused-vars": [2, { "args": "none" }],
+    "autofix/no-unused-vars": [2, { "args": "none" }],
     "sort-requires/sort-requires": 2,
     "prettier/prettier": 2
   }
