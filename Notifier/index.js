@@ -81,7 +81,7 @@ module.exports = async (context, timer) => {
           responseType: 'json'
         });
       } catch (e) {
-        context.log.error(e);
+        context.log.error(e.response || e);
         failed.push(...webhook.embeds);
       }
   }
