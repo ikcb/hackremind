@@ -17,7 +17,7 @@ module.exports = async () => {
   ).json();
 
   // remove hackathons whose end date is after more than 7 days
-  data = data.data.filter(e => new Date(e.end_date) < beforeDate);
+  data = data.data.filter(e => new Date(e.end_date) < beforeDate());
 
   // transform IDs to events
   await Promise.all(

@@ -7,8 +7,8 @@ module.exports = async () => {
   const data = await got('https://clist.by/api/v2/contest/', {
     headers: { Authorization: process.env.CLIST_BEARER },
     searchParams: {
-      start__gt: afterDate.toISOString(),
-      start__lt: beforeDate.toISOString()
+      start__gt: afterDate().toISOString(),
+      start__lt: beforeDate().toISOString()
     }
   }).json();
 

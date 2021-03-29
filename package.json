@@ -1,12 +1,13 @@
 {
   "private": true,
   "name": "hackremind",
+  "description": "",
   "version": "1.0.0",
   "type": "commonjs",
-  "bin": "./bin/worker",
   "scripts": {
     "lint": "lint-staged --allow-empty",
-    "start": "node ./bin/worker"
+    "start": "func start",
+    "test": "echo \"No tests yet...\""
   },
   "dependencies": {
     "capture-website": "^1.4.0",

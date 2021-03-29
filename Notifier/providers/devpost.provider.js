@@ -43,7 +43,7 @@ module.exports = async () => {
   });
 
   // remove hackathons whose last date of submission is after more than 7 days
-  data = data.filter(e => parseDate(e.submission_period_dates) < beforeDate);
+  data = data.filter(e => parseDate(e.submission_period_dates) < beforeDate());
 
   // transform data to events
   await Promise.all(

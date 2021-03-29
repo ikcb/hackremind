@@ -1,38 +1,14 @@
-#!/usr/bin/env node
-
 const got = require('got');
 const psl = require('psl');
 const { connect, connection } = require('mongoose');
 require('dotenv').config();
 
-const getEvents = require('../src/providers');
-const { Event } = require('../src/models');
-const { generateEmbed, retrieveCachedColors } = require('../src/generators');
-const { hosts } = require('../src/tuners');
+const getEvents = require('./providers');
+const { Event } = require('./models');
+const { generateEmbed, retrieveCachedColors } = require('./generators');
+const { hosts } = require('./tuners');
 
-process.on('warning', e => console.warn(e.stack));
-
-const newEvents = [];
-
-const storeIfNotExists = async event => {
-  if (!hosts[event.host]) return;
-
-  const res = await Event.findOneAndUpdate(
-    {
-      title: event.title,
-      host: event.host,
-      url: event.url,
-      start: event.start,
-      end: event.end
-    },
-    { $setOnInsert: event },
-    { upsert: true, new: true, rawResult: true }
-  );
-
-  res.lastErrorObject.updatedExisting || newEvents.push(res.value);
-};
-
-(async () => {
+module.exports = async (context, timer) => {
   // connect to the mongodb instance
   await connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -41,13 +17,33 @@ const storeIfNotExists = async event => {
     useUnifiedTopology: true
   });
 
-  // retrieve and store first 30 events in the database
+  const newEvents = [];
+
+  const storeIfNotExists = async event => {
+    if (!hosts[event.host]) return;
+
+    const res = await Event.findOneAndUpdate(
+      {
+        title: event.title,
+        host: event.host,
+        url: event.url,
+        start: event.start,
+        end: event.end
+      },
+      { $setOnInsert: event },
+      { upsert: true, new: true, rawResult: true }
+    );
+
+    res.lastErrorObject.updatedExisting || newEvents.push(res.value);
+  };
+
+  // retrieve and store first 10 events in the database
   const events = await getEvents();
 
   // eslint-disable-next-line no-restricted-syntax
   for (const event of events) {
     await storeIfNotExists(event);
-    if (newEvents.length > 29) break;
+    if (newEvents.length > 9) break;
   }
 
   // generate embeds of new events
@@ -56,7 +52,7 @@ const storeIfNotExists = async event => {
   // array to hold failed pushes
   const failed = [];
 
-  // barebone webhook
+  // bare bone webhook
   const webhook = {
     content: null,
     embeds: []
@@ -85,18 +81,14 @@ const storeIfNotExists = async event => {
           responseType: 'json'
         });
       } catch (e) {
-        console.error(e);
+        context.log.error(e);
         failed.push(...webhook.embeds);
       }
   }
 
   // TODO: remove failed embeds from db so that they can be pushed on later runs
-  console.warn(failed);
+  context.log.warn(failed);
 
   // close connection to the database
   await connection.close();
-  process.exit();
-})().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+};

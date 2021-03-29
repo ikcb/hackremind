@@ -18,7 +18,7 @@ const generateEmbed = async e => {
   const author = {
     name: truncateText(hosts[host], 256),
     url: await generateHost(host, url),
-    icon_url: `${baseIconURL}${host.replace(/[.\\]/g, '_')}.png`
+    icon_url: `${baseIconURL}${host.replace(/[./]/g, '_')}.png`
   };
   const { timestamp } = generateTimestamp(e);
   const image = await fixImageWidth(e.image);
