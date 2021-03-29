@@ -26,19 +26,7 @@ const generateColor = async url => {
   if (!colors[url])
     try {
       // get screenshot of website
-      const image = await limit(() =>
-        captureWebsite.buffer(
-          url,
-          // https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#setting-up-chrome-linux-sandbox
-          process.platform === 'win32'
-            ? null
-            : {
-                launchOptions: {
-                  args: ['--no-sandbox', '--disable-setuid-sandbox']
-                }
-              }
-        )
-      );
+      const image = await limit(() => captureWebsite.buffer(url));
 
       // generate palette from the screenshot
       const palette = await Vibrant.from(image).addFilter(filter).getPalette();

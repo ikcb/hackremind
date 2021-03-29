@@ -1,7 +1,8 @@
 *.js.map
 *.ts
-.git*
-.vscode
+*.md
 local.settings.json
 test
 tsconfig.json
+assets
+.*
