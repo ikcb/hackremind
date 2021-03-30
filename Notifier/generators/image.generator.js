@@ -1,11 +1,9 @@
 const probe = require('probe-image-size');
 
+const { ONE_PX_IMG } = require('../config');
+
 // fixes image url to make sure that each embed has the same width
-module.exports = async (
-  img,
-  defaultURL = process.env.ONE_PX_IMG ||
-    'https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png'
-) => {
+module.exports = async (img, defaultURL = ONE_PX_IMG) => {
   let url = defaultURL;
 
   // use img if it's not a placeholder, its A.R. >= 4:3 and width >= 432px

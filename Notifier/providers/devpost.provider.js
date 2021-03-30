@@ -42,7 +42,7 @@ module.exports = async () => {
     status: 'upcoming'
   });
 
-  // remove hackathons whose last date of submission is after more than 7 days
+  // remove hackathons whose submission start after more than 2 days
   data = data.filter(e => parseDate(e.submission_period_dates) < beforeDate());
 
   // transform data to events

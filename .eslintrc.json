@@ -8,6 +8,7 @@
   ],
   "plugins": ["autofix", "security", "sort-requires", "prettier"],
   "rules": {
+    "no-empty": [2, { "allowEmptyCatch": true }],
     "no-await-in-loop": 0,
     "no-nested-ternary": 0,
     "security/detect-unsafe-regex": 0,

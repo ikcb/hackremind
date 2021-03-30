@@ -1,16 +1,15 @@
 const got = require('got');
-const psl = require('psl');
 const { connect, connection } = require('mongoose');
-require('dotenv').config();
 
 const getEvents = require('./providers');
 const { Event } = require('./models');
-const { generateEmbed, retrieveCachedColors } = require('./generators');
+const { generateEmbed } = require('./generators');
 const { hosts } = require('./tuners');
+const { MONGO_URI, WEBHOOK_URL } = require('./config');
 
 module.exports = async (context, timer) => {
   // connect to the mongodb instance
-  await connect(process.env.MONGO_URI, {
+  await connect(MONGO_URI, {
     useNewUrlParser: true,
     useFindAndModify: false,
     useCreateIndex: true,
@@ -37,13 +36,13 @@ module.exports = async (context, timer) => {
     res.lastErrorObject.updatedExisting || newEvents.push(res.value);
   };
 
-  // retrieve and store first 10 events in the database
+  // retrieve and store first 5 events in the database
   const events = await getEvents();
 
   // eslint-disable-next-line no-restricted-syntax
   for (const event of events) {
     await storeIfNotExists(event);
-    if (newEvents.length > 9) break;
+    if (newEvents.length > 4) break;
   }
 
   // generate embeds of new events
@@ -58,32 +57,20 @@ module.exports = async (context, timer) => {
     embeds: []
   };
 
-  const colors = retrieveCachedColors();
-
-  // fill color of embeds without color with average color
-  // of other embeds with same host
-  embeds.forEach((element, i) => {
-    if (!element.color)
-      embeds[i].color =
-        colors[psl.parse(new URL(element.author.url).hostname).domain] || 0;
-  });
-
   // exhaust all embeds one by one
   while (embeds.length > 0) {
     webhook.embeds = embeds.splice(0, 1);
 
-    // embeds whose color cannot be determined are generally not accessible
-    if (webhook.embeds[0].color)
-      try {
-        // push embeds to Discord
-        await got.post(process.env.WEBHOOK_URL, {
-          json: webhook,
-          responseType: 'json'
-        });
-      } catch (e) {
-        context.log.error(e.response || e);
-        failed.push(...webhook.embeds);
-      }
+    try {
+      // push embeds to Discord
+      await got.post(WEBHOOK_URL, {
+        json: webhook,
+        responseType: 'json'
+      });
+    } catch (e) {
+      context.log.error(e.response || e);
+      failed.push(...webhook.embeds);
+    }
   }
 
   // TODO: remove failed embeds from db so that they can be pushed on later runs

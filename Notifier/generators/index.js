@@ -1,14 +1,11 @@
 const fixImageWidth = require('./image.generator');
+const generateColor = require('./color.generator');
 const generateHost = require('./host.generator');
 const generateTimestamp = require('./timestamp.generator');
 const truncateText = require('./text.generator');
-const { generateColor, retrieveCachedColors } = require('./color.generator');
 
 const { hosts } = require('../tuners');
-
-const baseIconURL =
-  `${process.env.ICONS_URL}${process.env.ICONS_URL.endsWith('/') ? '' : '/'}` ||
-  'https://raw.githubusercontent.com/iiitkota-codebase/hackremind/main/assets/icons/';
+const { ICONS_URL } = require('../config');
 
 const generateEmbed = async e => {
   const title = truncateText(e.title, 256);
@@ -17,8 +14,8 @@ const generateEmbed = async e => {
   const color = await generateColor(url);
   const author = {
     name: truncateText(hosts[host], 256),
-    url: await generateHost(host, url),
-    icon_url: `${baseIconURL}${host.replace(/[./]/g, '_')}.png`
+    url: await generateHost(host),
+    icon_url: `${ICONS_URL}${host.replace(/[./]/g, '_')}.png`
   };
   const { timestamp } = generateTimestamp(e);
   const image = await fixImageWidth(e.image);
@@ -27,9 +24,7 @@ const generateEmbed = async e => {
     description.length > 1 &&
     e.thumbnail &&
     !e.thumbnail.toLowerCase().includes('placeholder')
-      ? {
-          url: e.thumbnail
-        }
+      ? { url: e.thumbnail }
       : undefined;
 
   // create embed
@@ -48,6 +43,5 @@ const generateEmbed = async e => {
 module.exports = {
   fixImageWidth,
   generateEmbed,
-  generateTimestamp,
-  retrieveCachedColors
+  generateTimestamp
 };
