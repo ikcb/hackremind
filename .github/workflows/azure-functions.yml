@@ -9,6 +9,7 @@ on:
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
   NODE_VERSION: '14.x'
+  RELEASE_BUNDLE_PATH: 'release-bundle'
 
 jobs:
   build-and-deploy:
@@ -20,7 +21,7 @@ jobs:
       - name: Setup Node ${{ env.NODE_VERSION }} Environment
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '${{ env.NODE_VERSION }}'
 
       - name: 'Resolve Project Dependencies Using Yarn'
         shell: bash
@@ -29,13 +30,25 @@ jobs:
           yarn
           popd
 
+      - name: Copy Files to Release Bundle
+        shell: bash
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          rsync -av --prune-empty-dirs --exclude-from .funcignore ./ ${{ env.RELEASE_BUNDLE_PATH }}
+          popd
+
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
         id: fa
         with:
           app-name: 'hackremind'
           slot-name: 'production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/${{ env.RELEASE_BUNDLE_PATH }}'
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_21355c496f0440319f64e1ba124febbd }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
+          respect-funcignore: true
+#
+# Known Issue    : https://github.com/Azure/functions-action/issues/62
+# Workaround     : https://github.com/Azure/functions-action/issues/36#issuecomment-739555304
+#
