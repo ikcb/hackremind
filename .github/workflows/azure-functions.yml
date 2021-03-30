@@ -1,0 +1,43 @@
+name: Build and deploy Node.js project to Azure Function App - hackremind
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
+  NODE_VERSION: '14.x'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v2
+
+      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 'Resolve Project Dependencies Using Npm'
+        shell: bash
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          npm install
+          npm run build --if-present
+          npm run test --if-present
+          popd
+
+      - name: 'Run Azure Functions Action'
+        uses: Azure/functions-action@v1
+        id: fa
+        with:
+          app-name: 'hackremind'
+          slot-name: 'production'
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_21355c496f0440319f64e1ba124febbd }}
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true
