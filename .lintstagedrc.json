@@ -2,5 +2,6 @@
   "package.json": "prettier-package-json --write ",
   "*.js": "eslint --fix --max-warnings 0",
   "*.json": ["jsonlint", "prettier --write"],
-  "*.md": ["prettier --write", "markdownlint --fix"]
+  "*.md": ["prettier --write", "markdownlint --fix"],
+  "*.yml": "prettier --write"
 }

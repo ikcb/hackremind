@@ -1,9 +1,13 @@
+.*
+!/.funcignore
+
 *.js.map
 *.ts
 *.md
+
 local.settings.json
-test
 tsconfig.json
+commitlint.config.js
+
+test
 assets
-.*
-!/.funcignore
