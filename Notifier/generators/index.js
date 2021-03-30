@@ -4,8 +4,7 @@ const generateHost = require('./host.generator');
 const generateTimestamp = require('./timestamp.generator');
 const truncateText = require('./text.generator');
 
-const { hosts } = require('../tuners');
-const { ICONS_URL } = require('../config');
+const { hosts, config } = require('../tuners');
 
 const generateEmbed = async e => {
   const title = truncateText(e.title, 256);
@@ -15,7 +14,7 @@ const generateEmbed = async e => {
   const author = {
     name: truncateText(hosts[host], 256),
     url: await generateHost(host),
-    icon_url: `${ICONS_URL}${host.replace(/[./]/g, '_')}.png`
+    icon_url: `${config.ICONS_URL}${host.replace(/[./]/g, '_')}.png`
   };
   const { timestamp } = generateTimestamp(e);
   const image = await fixImageWidth(e.image);

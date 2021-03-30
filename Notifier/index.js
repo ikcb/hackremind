@@ -2,14 +2,13 @@ const got = require('got');
 const { connect, connection } = require('mongoose');
 
 const getEvents = require('./providers');
+const { config, hosts } = require('./tuners');
 const { Event } = require('./models');
 const { generateEmbed } = require('./generators');
-const { hosts } = require('./tuners');
-const { MONGO_URI, WEBHOOK_URL } = require('./config');
 
 module.exports = async (context, timer) => {
   // connect to the mongodb instance
-  await connect(MONGO_URI, {
+  await connect(config.MONGO_URI, {
     useNewUrlParser: true,
     useFindAndModify: false,
     useCreateIndex: true,
@@ -63,7 +62,7 @@ module.exports = async (context, timer) => {
 
     try {
       // push embeds to Discord
-      await got.post(WEBHOOK_URL, {
+      await got.post(config.WEBHOOK_URL, {
         json: webhook,
         responseType: 'json'
       });

@@ -1,12 +1,11 @@
 const got = require('got');
 
-const { afterDate, beforeDate } = require('../tuners');
-const { CLIST_BEARER: Authorization } = require('../config');
+const { afterDate, beforeDate, config } = require('../tuners');
 
 module.exports = async () => {
   // call the CLIST API
   const data = await got('https://clist.by/api/v2/contest/', {
-    headers: { Authorization },
+    headers: { Authorization: config.CLIST_BEARER },
     searchParams: {
       start__gt: afterDate().toISOString(),
       start__lt: beforeDate().toISOString()
