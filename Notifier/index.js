@@ -1,4 +1,5 @@
 const got = require('got');
+const shell = require('shelljs');
 const { connect, connection } = require('mongoose');
 
 const getEvents = require('./providers');
@@ -77,4 +78,7 @@ module.exports = async (context, timer) => {
 
   // close connection to the database
   await connection.close();
+
+  // close zombie chrome processes
+  shell.exec('pkill chrome');
 };
