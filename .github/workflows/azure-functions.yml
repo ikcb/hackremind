@@ -23,13 +23,6 @@ jobs:
         with:
           node-version: '${{ env.NODE_VERSION }}'
 
-      - name: 'Resolve Project Dependencies Using Yarn'
-        shell: bash
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          yarn
-          popd
-
       - name: Copy Files to Release Bundle
         shell: bash
         run: |
