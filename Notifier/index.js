@@ -3,7 +3,7 @@ const shell = require('shelljs');
 const { connect, connection } = require('mongoose');
 
 const getEvents = require('./providers');
-const { config, hosts } = require('./tuners');
+const { config, hosts, preserveTill } = require('./tuners');
 const { Event } = require('./models');
 const { generateEmbed } = require('./generators');
 
@@ -16,6 +16,9 @@ module.exports = async (context, timer) => {
     useUnifiedTopology: true
   });
 
+  // remove events older than 5 days
+  Event.remove({ start: { $lt: preserveTill() } });
+
   const newEvents = [];
 
   const storeIfNotExists = async event => {
@@ -25,9 +28,7 @@ module.exports = async (context, timer) => {
       {
         title: event.title,
         host: event.host,
-        url: event.url,
-        start: event.start,
-        end: event.end
+        url: event.url
       },
       { $setOnInsert: event },
       { upsert: true, new: true, rawResult: true }
