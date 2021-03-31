@@ -21,7 +21,7 @@ const filter = (r, g, b, a) =>
 const limit = pLimit(config.CONCURRENCY);
 
 module.exports = async url => {
-  let color = randomColor({ luminosity: 'light' });
+  let color = randomColor({ luminosity: 'bright' });
 
   try {
     // get screenshot of website
