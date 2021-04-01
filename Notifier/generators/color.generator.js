@@ -1,3 +1,4 @@
+const got = require('got');
 const pLimit = require('p-limit');
 const puppeteer = require('puppeteer');
 const randomColor = require('randomcolor');
@@ -12,10 +13,26 @@ const openBrowser = async () => {
   browser = await puppeteer.launch();
 };
 
-// generates screenshot of the provided URL
+// generates image/screenshot buffer of the provided URL
 const captureWebsite = async url => {
+  if (!url || url.length < 1) return null;
+
+  // fetch url
+  const responsePromise = got(url);
+  const bufferPromise = responsePromise.buffer();
+
+  const [response, buffer] = await Promise.all([
+    responsePromise,
+    bufferPromise
+  ]);
+
+  // check if url is already an image
+  if (response.headers['content-type'].includes('image')) return buffer;
+
+  // else take screenshot of the site
   const page = await browser.newPage();
-  await page.goto(url, { timeout: 60000 });
+  await page.setContent(response.body, { timeout: 60000 });
+
   const screenshotBuffer = await page.screenshot({
     clip: {
       x: 0,
@@ -24,6 +41,8 @@ const captureWebsite = async url => {
       height: 800
     }
   });
+
+  // close opened page
   await page.close();
   return screenshotBuffer;
 };
@@ -53,25 +72,24 @@ const filter = (r, g, b, a) =>
 // limit number of simultaneous puppeteer instances
 const limit = pLimit(config.CONCURRENCY);
 
-const getPalette = img => Vibrant.from(img).addFilter(filter).getPalette();
+const getPalette = buffer =>
+  Vibrant.from(buffer).addFilter(filter).getPalette();
 
-const generateColor = async (url, imgURL) => {
+// TODO: make color vibrant/bright
+const generateColor = async urls => {
   let color = randomColor({ luminosity: 'bright' });
 
-  try {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const url of urls) {
     try {
-      // try capturing screenshot of website
-      const imgBuffer = await limit(() => captureWebsite(url));
+      const buffer = await limit(() => captureWebsite(url));
 
-      // generate palette from the screenshot
-      color = (await getPalette(imgBuffer)).Vibrant.hex;
-    } catch (e) {
-      if (!imgURL || imgURL.length < 1) throw e;
+      // generate palette from the image buffer
+      color = (await getPalette(buffer)).Vibrant.hex;
 
-      // try generating palette from imgURL instead
-      color = (await getPalette(imgURL)).Vibrant.hex;
-    }
-  } catch {}
+      break; // will break the loop if above steps are successful
+    } catch {}
+  }
 
   // convert color from hex to dec
   return parseInt(color.slice(1), 16);

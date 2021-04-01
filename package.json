@@ -6,8 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "lint": "lint-staged --allow-empty",
-    "start": "func start",
-    "test": "echo \"No tests yet...\""
+    "start": "func start"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.5",

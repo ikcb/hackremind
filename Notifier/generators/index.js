@@ -14,12 +14,17 @@ const generateEmbed = async e => {
   const title = truncateText(e.title, 256);
   const description = truncateText(e.description, 2048);
   const { host, url } = e;
-  const color = await generateColor(url, e.image);
   const author = {
     name: truncateText(hosts[host], 256),
     url: await generateHost(host),
     icon_url: `${config.ICONS_URL}${host.replace(/[./]/g, '_')}.png`
   };
+  const color = await generateColor([
+    url,
+    e.image,
+    e.thumbnail,
+    author.icon_url
+  ]);
   const { timestamp } = generateTimestamp(e);
   const image = await fixImageWidth(e.image);
   const thumbnail =
@@ -28,7 +33,7 @@ const generateEmbed = async e => {
     e.thumbnail &&
     !e.thumbnail.toLowerCase().includes('placeholder')
       ? { url: e.thumbnail }
-      : undefined;
+      : null;
 
   // create embed
   return {
