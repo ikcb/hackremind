@@ -1,8 +1,12 @@
 const fixImageWidth = require('./image.generator');
-const generateColor = require('./color.generator');
 const generateHost = require('./host.generator');
 const generateTimestamp = require('./timestamp.generator');
 const truncateText = require('./text.generator');
+const {
+  closeBrowser,
+  generateColor,
+  openBrowser
+} = require('./color.generator');
 
 const { hosts, config } = require('../tuners');
 
@@ -40,7 +44,9 @@ const generateEmbed = async e => {
 };
 
 module.exports = {
+  closeBrowser,
   fixImageWidth,
   generateEmbed,
-  generateTimestamp
+  generateTimestamp,
+  openBrowser
 };

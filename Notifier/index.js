@@ -1,11 +1,10 @@
 const got = require('got');
-const shell = require('shelljs');
 const { connect, connection } = require('mongoose');
 
 const getEvents = require('./providers');
 const { config, hosts, preserveTill } = require('./tuners');
 const { Event } = require('./models');
-const { generateEmbed } = require('./generators');
+const { generateEmbed, openBrowser, closeBrowser } = require('./generators');
 
 module.exports = async (context, timer) => {
   // connect to the mongodb instance
@@ -46,8 +45,14 @@ module.exports = async (context, timer) => {
     if (newEvents.length > 4) break;
   }
 
+  // open puppeteer (chromium browser)
+  await openBrowser();
+
   // generate embeds of new events
   const embeds = await Promise.all(newEvents.map(generateEmbed));
+
+  // close puppeteer (chromium browser)
+  await closeBrowser();
 
   // array to hold failed pushes
   const failed = [];
@@ -79,7 +84,4 @@ module.exports = async (context, timer) => {
 
   // close connection to the database
   await connection.close();
-
-  // close zombie chrome processes
-  shell.exec('pkill chrome');
 };
