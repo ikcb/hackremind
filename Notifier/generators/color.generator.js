@@ -53,16 +53,24 @@ const filter = (r, g, b, a) =>
 // limit number of simultaneous puppeteer instances
 const limit = pLimit(config.CONCURRENCY);
 
-const generateColor = async url => {
+const getPalette = img => Vibrant.from(img).addFilter(filter).getPalette();
+
+const generateColor = async (url, imgURL) => {
   let color = randomColor({ luminosity: 'bright' });
 
   try {
-    // get screenshot of website
-    const image = await limit(() => captureWebsite(url));
+    try {
+      // try capturing screenshot of website
+      const imgBuffer = await limit(() => captureWebsite(url));
 
-    // generate palette from the screenshot
-    const palette = await Vibrant.from(image).addFilter(filter).getPalette();
-    color = palette.Vibrant.hex;
+      // generate palette from the screenshot
+      color = (await getPalette(imgBuffer)).Vibrant.hex;
+    } catch (e) {
+      if (!imgURL || imgURL.length < 1) throw e;
+
+      // try generating palette from imgURL instead
+      color = (await getPalette(imgURL)).Vibrant.hex;
+    }
   } catch {}
 
   // convert color from hex to dec

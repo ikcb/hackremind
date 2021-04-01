@@ -6,12 +6,6 @@ const { gfm } = require('turndown-plugin-gfm');
 // Turndown rules
 const rules = {};
 
-// strikethrough in Discord uses double tilde
-rules.strikethrough = {
-  filter: ['del', 's', 'strike'],
-  replacement: content => `~~${content}~~`
-};
-
 // add underline support
 rules.underline = {
   filter: ['u'],

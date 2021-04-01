@@ -14,7 +14,7 @@ const generateEmbed = async e => {
   const title = truncateText(e.title, 256);
   const description = truncateText(e.description, 2048);
   const { host, url } = e;
-  const color = await generateColor(url);
+  const color = await generateColor(url, e.image);
   const author = {
     name: truncateText(hosts[host], 256),
     url: await generateHost(host),
