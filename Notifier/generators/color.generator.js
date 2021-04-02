@@ -41,7 +41,8 @@ const captureWebsite = async url => {
       y: 0,
       width: 1280,
       height: 800
-    }
+    },
+    waitUntil: 'networkidle2'
   });
 
   // close opened page
