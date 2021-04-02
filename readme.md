@@ -14,7 +14,7 @@ There are two ways to use the bot.
    <summary>I don't want to mess things up 😐</summary>
    <br>
 
-Join [IIIT Kota CodeBase's Discord Server](https://discord.link/CodeBase) and
+Join [IIIT Kota CodeBase's Discord Server][1] and
 follow **#upcoming-competitions** to add the channel's updates to your server.
 
 </details>
@@ -23,7 +23,7 @@ follow **#upcoming-competitions** to add the channel's updates to your server.
    <summary>I kinda like doing things my way!</summary>
    <br>
 
-Head over to [developers' guide](#developers-guide) to learn more.
+Head over to [developers' guide][2] to learn more.
 
 </details>
 
@@ -33,36 +33,36 @@ Head over to [developers' guide](#developers-guide) to learn more.
    <summary>Click to expand</summary>
    <br>
 
-- [Advent of Code](https://adventofcode.com)
-- [AtCoder](https://atcoder.jp/contests)
-- [AZsPCs](http://azspcs.com)
-- [Bubble Cup](https://www.bubblecup.org)
-- [Reply Challenges](https://challenges.reply.com)
-- [CodeChef](https://www.codechef.com/contests)
-- [Codeforces](https://codeforces.com/contests)
-- [Gym - Codeforces](https://codeforces.com/gyms)
-- [Codility](https://app.codility.com/programmers/challenges)
-- [CodinGame](https://www.codingame.com/multiplayer)
-- [Google](https://codingcompetitions.withgoogle.com)
-- [CTFtime](https://ctftime.org)
-- [Dare2Compete](https://dare2compete.com)
-- [Devfolio](https://devfolio.co/hackathons)
-- [Devpost](https://devpost.com/hackathons)
-- [DMOJ: Modern Online Judge](https://dmoj.ca/contests)
-- [E-Olymp](https://www.e-olymp.com/en/contests)
-- [Facebook](https://www.facebook.com/codingcompetitions)
-- [HackerEarth](https://www.hackerearth.com)
-- [HackerRank](https://www.hackerrank.com)
-- [ICFP Programming Contest](http://icfpcontest.org)
-- [Kaggle](https://www.kaggle.com/competitions)
-- [LeetCode](https://leetcode.com/contest)
-- [Kattis](https://open.kattis.com)
-- [Project Euler](https://projecteuler.net)
-- [Quora](https://www.quora.com/q/quoraprogrammingchallenge)
-- [Russian AI Cup](https://russianaicup.ru)
-- [Sphere Online Judge (SPOJ)](https://www.spoj.com/contests)
-- [TLX](https://tlx.toki.id/contests)
-- [Topcoder](https://www.topcoder.com/challenges)
+- [Advent of Code][3]
+- [AtCoder][4]
+- [AZsPCs][5]
+- [Bubble Cup][6]
+- [Reply Challenges][7]
+- [CodeChef][8]
+- [Codeforces][9]
+- [Gym - Codeforces][10]
+- [Codility][11]
+- [CodinGame][12]
+- [Google][13]
+- [CTFtime][14]
+- [Dare2Compete][15]
+- [Devfolio][16]
+- [Devpost][17]
+- [DMOJ: Modern Online Judge][18]
+- [E-Olymp][19]
+- [Facebook][20]
+- [HackerEarth][21]
+- [HackerRank][22]
+- [ICFP Programming Contest][23]
+- [Kaggle][24]
+- [LeetCode][25]
+- [Kattis][26]
+- [Project Euler][27]
+- [Quora][28]
+- [Russian AI Cup][29]
+- [Sphere Online Judge (SPOJ)][30]
+- [TLX][31]
+- [Topcoder][32]
 
 </details>
 
@@ -73,25 +73,76 @@ Head over to [developers' guide](#developers-guide) to learn more.
    <br>
 
 This bot is an
-[Azure Function App](https://azure.microsoft.com/en-in/services/functions/)
+[Azure Function App][33]
 using Node.js as runtime. You can customize the following:
 
 ### Environment Variables
 
 <!-- markdownlint-disable MD013 -->
 
-|       Variable | Description                                                                                                                                                                                                                                                                                                        |                                     Possible Values, Defaults and Format                                      |
-| -------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-----------------------------------------------------------------------------------------------------------: |
-|     `NODE_ENV` | Tells if the app is running in production or not. Note that [`dotenv`](https://www.npmjs.com/package/dotenv) is listed as a dev dependency and won't be available on production to extract variables from `.env` file, even if it is pushed, so you must set this to ensure that the app runs fine on server also. |                           `development` (default) or `production` (case sensitive)                            |
-|    `MONGO_URI` | Connection string (URI) of a MongoDB database. A database is required to store information about events which have been already pushed. You don't need to worry about the storage ([512MB](https://www.mongodb.com/pricing) should suffice). The app will automatically remove old records.                        |         [Connection String URI Format](https://docs.mongodb.com/manual/reference/connection-string/)          |
-| `CLIST_BEARER` | [CLIST](https://clist.by/api/v2/doc/) (Bearer Token) Authorization Header                                                                                                                                                                                                                                          | [`ApiKey clist-user:api-key`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization#syntax) |
-|  `WEBHOOK_URL` | Discord Webhook URL (Ref. [Making a Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks))                                                                                                                                                                                           |                        `https://discord.com/api/webhooks/{webhook.id}/{webhook.token}`                        |
-|    `ICONS_URL` | A location containing icons of all [hosts](Notifier/tuners/hosts.tuner.js). Icon URL of the host is generated by this [mechanism](Notifier/generators/index.js#L20).                                                                                                                                               |         <https://raw.githubusercontent.com/iiitkota-codebase/hackremind/main/assets/icons/> (default)         |
-|   `ONE_PX_IMG` | URL containing a 1px transparent image of at least 432px (required to fix width of embeds). (Ref. [Discord.js embed width is unreliable](https://stackoverflow.com/a/66357227/11613622))                                                                                                                           |        <https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png> (default)         |
-|  `CONCURRENCY` | The max number of tabs your environment can handle in a [Puppeteer](https://www.npmjs.com/package/puppeteer) (Chromium) browser instance. High concurrency may result in failure (like socket hang up, EventEmitter memory leak) depending on free memory, processing power, network speed,..                      |                      any decimal value between `1` to `5` (both inclusive, default `4`)                       |
+|       Variable | Description                                                                                                                                                                                                                                                                      |                                Possible Values, Defaults and Format                                |
+| -------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------: |
+|     `NODE_ENV` | Tells if the app is running in production or not. Note that [`dotenv`][34] is listed as a dev dependency and won't be available on production to extract variables from `.env` file, even if it is pushed, so you must set this to ensure that the app runs fine on server also. |                      `development` (default) or `production` (case sensitive)                      |
+|    `MONGO_URI` | Connection string (URI) of a MongoDB database. A database is required to store information about events which have been already pushed. You don't need to worry about the storage ([512MB][35] should suffice). The app will automatically remove old records.                   |                                 [Connection String URI Format][36]                                 |
+| `CLIST_BEARER` | [CLIST][37] (Bearer Token) Authorization Header                                                                                                                                                                                                                                  |                                 [`ApiKey clist-user:api-key`][38]                                  |
+|  `WEBHOOK_URL` | Discord Webhook URL (Ref. [Making a Webhook][39])                                                                                                                                                                                                                                |                  `https://discord.com/api/webhooks/{webhook.id}/{webhook.token}`                   |
+|    `ICONS_URL` | A location containing icons of all [hosts][40]. Icon URL of the host is generated by this [mechanism][41].                                                                                                                                                                       | [https://raw.githubusercontent.com/iiitkota-codebase/hackremind/main/assets/icons/][42] (default)  |
+|   `ONE_PX_IMG` | URL containing a 1px transparent image of at least 432px (required to fix width of embeds). (Ref. [Discord.js embed width is unreliable][43])                                                                                                                                    | [https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png][44] (default) |
+|  `CONCURRENCY` | The max number of tabs your environment can handle in a [Puppeteer][45] (Chromium) browser instance. High concurrency may result in failure (like socket hang up, EventEmitter memory leak) depending on free memory, processing power, network speed,..                         |                 any decimal value between `1` to `5` (both inclusive, default `4`)                 |
 
-On a local setup, these settings can be modified by creating a `.env` file at the root of the project. Refer [.env.example](.env.example). On server, [create/modify application settings](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings?tabs=portal#settings). Note that, all the settings having a default value are optional. Follow the [official Azure Function App documentation](https://docs.microsoft.com/en-in/azure/azure-functions/) to run and host the bot. You must use Linux consumption plan and deploy using remote build, otherwise Puppeteer won't work. You can modify [this cron expression](Notifier/function.json#L7) to make the bot run at different intervals. If you're stuck on something we might be of some help. Feel free to create a [new discussion](/discussions/new).
+On a local setup, these settings can be modified by creating a `.env` file at the root of the project. Refer [.env.example][46]. On server, [create/modify application settings][47]. Note that, all the settings having a default value are optional. Follow the [official Azure Function App documentation][48] to run and host the bot. You must use Linux consumption plan and deploy using remote build, otherwise Puppeteer won't work. You can modify [this cron expression][49] to make the bot run at different intervals. If you're stuck on something we might be of some help. Feel free to create a [new discussion][50].
 
 <!-- markdownlint-enable MD013 -->
 
 </details>
+
+[1]: https://discord.link/CodeBase
+[2]: #developers-guide
+[3]: https://adventofcode.com
+[4]: https://atcoder.jp/contests
+[5]: http://azspcs.com
+[6]: https://www.bubblecup.org
+[7]: https://challenges.reply.com
+[8]: https://www.codechef.com/contests
+[9]: https://codeforces.com/contests
+[10]: https://codeforces.com/gyms
+[11]: https://app.codility.com/programmers/challenges
+[12]: https://www.codingame.com/multiplayer
+[13]: https://codingcompetitions.withgoogle.com
+[14]: https://ctftime.org
+[15]: https://dare2compete.com
+[16]: https://devfolio.co/hackathons
+[17]: https://devpost.com/hackathons
+[18]: https://dmoj.ca/contests
+[19]: https://www.e-olymp.com/en/contests
+[20]: https://www.facebook.com/codingcompetitions
+[21]: https://www.hackerearth.com
+[22]: https://www.hackerrank.com
+[23]: http://icfpcontest.org
+[24]: https://www.kaggle.com/competitions
+[25]: https://leetcode.com/contest
+[26]: https://open.kattis.com
+[27]: https://projecteuler.net
+[28]: https://www.quora.com/q/quoraprogrammingchallenge
+[29]: https://russianaicup.ru
+[30]: https://www.spoj.com/contests
+[31]: https://tlx.toki.id/contests
+[32]: https://www.topcoder.com/challenges
+[33]: https://azure.microsoft.com/en-in/services/functions/
+[34]: https://www.npmjs.com/package/dotenv
+[35]: https://www.mongodb.com/pricing
+[36]: https://docs.mongodb.com/manual/reference/connection-string/
+[37]: https://clist.by/api/v2/doc/
+[38]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization#syntax
+[39]: https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
+[40]: Notifier/tuners/hosts.tuner.js
+[41]: Notifier/generators/index.js#L20
+[42]: https://raw.githubusercontent.com/iiitkota-codebase/hackremind/main/assets/icons/
+[43]: https://stackoverflow.com/a/66357227/11613622
+[44]: https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png
+[45]: https://www.npmjs.com/package/puppeteer
+[46]: .env.example
+[47]: https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings?tabs=portal#settings
+[48]: https://docs.microsoft.com/en-in/azure/azure-functions/
+[49]: Notifier/function.json#L7
+[50]: /discussions/new
