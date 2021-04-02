@@ -92,15 +92,19 @@ using Node.js as runtime. You can customize the following:
 
 <!-- markdownlint-enable MD013 -->
 
-On a local setup, these settings can be modified by creating a `.env` file at
-the root of the project. Refer [.env.example][46]. On server,
-[create/modify application settings][47]. Note that, all the settings having a
-default value are optional. Follow the
-[official Azure Function App documentation][48] to run and host the bot. You
-must use Linux consumption plan and deploy using remote build, otherwise
-Puppeteer won't work. You can modify [this cron expression][49] to make the bot
-run at different intervals. If you're stuck on something we might be of some
-help. Feel free to create a [new discussion][50].
+### Notes
+
+- On a local setup, these settings can be modified by creating a `.env` file at
+  the root of the project. Refer [.env.example][46].
+- On server, [create/modify application settings][47]. Note that, all the
+  settings having a default value are optional.
+- Follow the [official Azure Function App documentation][48] to run and host the
+  bot.
+- You must use Linux consumption plan and deploy using remote build, otherwise
+  Puppeteer won't work.
+- You can modify [this cron expression][49] to make the bot run at different intervals.
+- If you're stuck on something we might be of some help. Feel free to create a
+  [new discussion][50].
 
 </details>
 
