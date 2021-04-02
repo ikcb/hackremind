@@ -15,7 +15,7 @@ There are two ways to use the bot.
    <br>
 
 Join [our Discord Server][1] and follow **#upcoming-competitions** to add the
-channel's updates to your server.
+channel's notifications to your server.
 
 </details>
 
@@ -24,7 +24,7 @@ channel's updates to your server.
    <br>
 
 Head over to [developers' guide][2] to learn more and deploy your version of
-the bot to [![58]][57]
+the bot to⠀[![58]][57]
 
 </details>
 
