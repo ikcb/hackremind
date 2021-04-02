@@ -108,7 +108,7 @@ _All the environment variables having a default value are optional._
 
 ### Deployment Notes
 
-**Puppeteer works only on Linux consumption plan, and when deployed using
+**Puppeteer works only on Linux consumption plan and when deployed using
 remote build.**
 
 You can modify [this cron expression][49] if you want to run the bot at
@@ -168,7 +168,7 @@ If you're stuck on something we might be of some help. Feel free to create a
 [47]: https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings#settings
 [48]: https://docs.microsoft.com/en-in/azure/azure-functions/
 [49]: Notifier/function.json#L7
-[50]: /discussions/new
+[50]: https://github.com/iiitkota-codebase/hackremind/discussions/new
 [51]: https://askubuntu.com/q/58814/1115724
 [52]: https://stackoverflow.com/q/714877/11613622
 [53]: https://superuser.com/q/79612/1081541
