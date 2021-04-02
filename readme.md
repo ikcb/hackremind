@@ -14,8 +14,8 @@ There are two ways to use the bot.
    <summary>I don't want to mess things up 😐</summary>
    <br>
 
-Join [IIIT Kota CodeBase's Discord Server][1] and
-follow **#upcoming-competitions** to add the channel's updates to your server.
+Join [our Discord Server][1] and follow **#upcoming-competitions** to add the
+channel's updates to your server.
 
 </details>
 
@@ -23,7 +23,8 @@ follow **#upcoming-competitions** to add the channel's updates to your server.
    <summary>I kinda like doing things my way!</summary>
    <br>
 
-Head over to [developers' guide][2] to learn more.
+Head over to [developers' guide][2] to learn more and deploy your version of
+the bot to [![58]][57]
 
 </details>
 
@@ -92,19 +93,29 @@ using Node.js as runtime. You can customize the following:
 
 <!-- markdownlint-enable MD013 -->
 
-### Notes
+Locally, one can set/modify environment variables in numerous ways. Some of them
+are:
 
-- On local setup, these settings can be modified by creating a `.env` file at
-  the root of the project. [Ref.][46].
-- On server, [create/modify application settings][47].
-- All the environment settings having a default value are optional.
-- Follow the [official Azure Function App documentation][48] to run and host the
-  bot.
-- You must use Linux consumption plan and deploy using remote build, otherwise
-  Puppeteer won't work.
-- You can modify [this cron expression][49] to make the bot run at different intervals.
-- If you're stuck on something we might be of some help. Feel free to create a
-  [new discussion][50].
+- Create a `.env` at root of the folder. [Ref.][46].
+- Set variables in the shell itself. Ref.:[1][51],[2][52],[3][53].
+- Use `local.settings.json`. Ref.:[SO][54],[docs][55].
+
+On server, you need to specify [application settings][47]. Apart from the
+methods mentioned in that article, one can use this [VSCode extension][56] or
+use `--publish-local-settings` switch when you publish.
+
+_All the environment variables having a default value are optional._
+
+### Deployment Notes
+
+**Puppeteer works only on Linux consumption plan, and when deployed using
+remote build.**
+
+You can modify [this cron expression][49] if you want to run the bot at
+different intervals. It currently runs every 2 hours.
+
+If you're stuck on something we might be of some help. Feel free to create a
+[new discussion][50].
 
 </details>
 
@@ -154,7 +165,15 @@ using Node.js as runtime. You can customize the following:
 [44]: https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png
 [45]: https://www.npmjs.com/package/puppeteer
 [46]: .env.example
-[47]: https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings?tabs=portal#settings
+[47]: https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings#settings
 [48]: https://docs.microsoft.com/en-in/azure/azure-functions/
 [49]: Notifier/function.json#L7
 [50]: /discussions/new
+[51]: https://askubuntu.com/q/58814/1115724
+[52]: https://stackoverflow.com/q/714877/11613622
+[53]: https://superuser.com/q/79612/1081541
+[54]: https://stackoverflow.com/a/47434842/11613622
+[55]: https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#local-settings-file
+[56]: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions
+[57]: https://azure.microsoft.com/en-in/overview/
+[58]: https://img.shields.io/badge/Microsoft%20Azure-555555?style=for-the-badge&logo=microsoft-azure
