@@ -27,11 +27,13 @@ const captureWebsite = async url => {
   ]);
 
   // check if url is already an image
-  if (response.headers['content-type'].includes('image')) return buffer;
+  try {
+    if (response.headers['content-type'].includes('image')) return buffer;
+  } catch {}
 
   // else take screenshot of the site
   const page = await browser.newPage();
-  await page.setContent(response.body, { timeout: 60000 });
+  await page.goto(url, { timeout: 60000 });
 
   const screenshotBuffer = await page.screenshot({
     clip: {
