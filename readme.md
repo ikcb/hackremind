@@ -96,7 +96,7 @@ using Node.js as runtime. You can customize the following:
 Locally, one can set/modify environment variables in numerous ways. Some of them
 are:
 
-- Create a `.env` at root of the folder. [Ref.][46].
+- Create a `.env` at root of the folder. [Ref.][46]
 - Set variables in the shell itself. Ref.:[1][51],[2][52],[3][53].
 - Use `local.settings.json`. Ref.:[SO][54],[docs][55].
 
