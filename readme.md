@@ -94,10 +94,10 @@ using Node.js as runtime. You can customize the following:
 
 ### Notes
 
-- On a local setup, these settings can be modified by creating a `.env` file at
-  the root of the project. Refer [.env.example][46].
-- On server, [create/modify application settings][47]. Note that, all the
-  settings having a default value are optional.
+- On local setup, these settings can be modified by creating a `.env` file at
+  the root of the project. [Ref.][46].
+- On server, [create/modify application settings][47].
+- All the environment settings having a default value are optional.
 - Follow the [official Azure Function App documentation][48] to run and host the
   bot.
 - You must use Linux consumption plan and deploy using remote build, otherwise
