@@ -2,9 +2,20 @@ name: 'CodeQL'
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - '**.js'
+      - '**.json'
+      - '!.*'
   pull_request:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - '**.js'
+      - '**.json'
+      - '!.*'
+  workflow_dispatch:
 
 jobs:
   analyze:
