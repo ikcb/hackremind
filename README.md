@@ -3,8 +3,8 @@
 # HackRemind <sup>β</sup>
 
 HackRemind (currently in Beta) is a webhook-based Discord bot that periodically
-sends reminders of competitive programming and machine learning contests
-hackathons, capture-the-flag challenges and other coding related events.
+sends reminders of competitive coding and machine learning contests, hackathons,
+capture-the-flag challenges and other coding related events.
 
 ## How to Use?
 
@@ -108,7 +108,7 @@ are:
 
 On server, you need to specify [application settings][47]. Apart from the
 methods mentioned in that article, one can use this [VSCode extension][56] or
-use `--publish-local-settings` switch when you publish.
+use `--publish-local-settings` switch while publishing.
 
 _All the environment variables having a default value are optional._
 
