@@ -1,4 +1,4 @@
-const got = require('got');
+const { Client } = require('discord.js');
 const { connect, connection } = require('mongoose');
 
 const getEvents = require('./providers');
@@ -57,25 +57,19 @@ module.exports = async (context, timer) => {
   // array to hold failed pushes
   const failed = [];
 
-  // bare bone webhook
-  const webhook = {
-    content: null,
-    embeds: []
-  };
+  const client = new Client();
+  await client.login(config.BOT_TOKEN);
+  const channel = await client.channels.fetch(config.CHANNEL_ID);
 
   // exhaust all embeds one by one
   while (embeds.length > 0) {
-    webhook.embeds = embeds.splice(0, 1);
-
+    const [embed] = embeds.splice(0, 1);
     try {
-      // push embeds to Discord
-      await got.post(config.WEBHOOK_URL, {
-        json: webhook,
-        responseType: 'json'
-      });
+      const message = await channel.send({ embed });
+      channel.type === 'news' && (await message.crosspost());
     } catch (e) {
-      context.log.error(e.response || e);
-      failed.push(...webhook.embeds);
+      context.log.error(e);
+      failed.push(e);
     }
   }
 
@@ -84,4 +78,5 @@ module.exports = async (context, timer) => {
 
   // close connection to the database
   await connection.close();
+  client.destroy();
 };

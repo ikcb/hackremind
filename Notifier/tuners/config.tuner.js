@@ -1,13 +1,15 @@
 // eslint-disable-next-line global-require, import/no-extraneous-dependencies, node/no-unpublished-require
 process.env.NODE_ENV === 'production' || require('dotenv').config();
 
-if (!process.env.CLIST_BEARER || !process.env.WEBHOOK_URL) process.exit(3);
+(process.env.CLIST_BEARER && process.env.BOT_TOKEN && process.env.CHANNEL_ID) ||
+  process.exit(3);
 
 module.exports = {
   PRODUCTION: process.env.NODE_ENV === 'production',
   MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/hackremind',
   CLIST_BEARER: process.env.CLIST_BEARER,
-  WEBHOOK_URL: process.env.WEBHOOK_URL,
+  BOT_TOKEN: process.env.BOT_TOKEN,
+  CHANNEL_ID: process.env.CHANNEL_ID,
   ICONS_URL: process.env.ICONS_URL
     ? `${process.env.ICONS_URL}${
         process.env.ICONS_URL.endsWith('/') ? '' : '/'
