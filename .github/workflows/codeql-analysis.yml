@@ -39,15 +39,5 @@ jobs:
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
 
-      - name: Lint Code
-        shell: bash
-        run: |
-          yarn
-          yarn prettier --check . --ignore-unknown
-          yarn prettier-package-json --list-different package.json
-          yarn eslint Notifier --ext .js
-          yarn markdownlint '**/*.md' --ignore node_modules
-          find . -name '*.json' -not -path './node_modules/*' -exec yarn jsonlint {} -q \;
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
