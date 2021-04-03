@@ -57,7 +57,7 @@ const closeBrowser = async () => {
   } catch {}
 
   // close zombie chrome processes
-  shell.exec('pkill chrome');
+  config.PRODUCTION && shell.exec('pkill chrome');
 };
 
 // remove branding colors (https://discord.com/branding)
