@@ -17,6 +17,13 @@ There are two ways to use the bot.
 Join [our Discord Server][1] and follow **#upcoming-competitions** to add the
 channel's notifications to your server.
 
+After adding bot to your server, you may like to change its name or avatar. You
+can modify them by editing your channel (little cogwheel icon alongside channel
+name). Open **Integrations** > **Channels Followed** >
+**CodeBase #upcoming-competitions** to get the required settings.
+
+![59]
+
 </details>
 
 <details>
@@ -96,8 +103,8 @@ Locally, one can set/modify environment variables in numerous ways. Some of them
 are:
 
 - Create a `.env` at root of the folder. [Ref.][46]
-- Set variables in the shell itself. Ref.:[1][51],[2][52],[3][53].
-- Use `local.settings.json`. Ref.:[SO][54],[docs][55].
+- Set variables in the shell itself. Ref.:[1][51],[2][52],[3][53]
+- Use `local.settings.json`. Ref.:[SO][54],[docs][55]
 
 On server, you need to specify [application settings][47]. Apart from the
 methods mentioned in that article, one can use this [VSCode extension][56] or
@@ -176,3 +183,4 @@ If you're stuck on something we might be of some help. Feel free to create a
 [56]: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions
 [57]: https://azure.microsoft.com/en-in/overview/
 [58]: https://img.shields.io/badge/Microsoft%20Azure-555555?style=for-the-badge&logo=microsoft-azure
+[59]: https://user-images.githubusercontent.com/40380293/113475921-b3a67280-9495-11eb-8735-7fd009461999.png
