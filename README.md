@@ -3,8 +3,8 @@
 # HackRemind <sup>β</sup>
 
 HackRemind (currently in Beta) is a webhook-based Discord bot that periodically
-sends reminders of competitive programming and machine learning contests
-hackathons, capture-the-flag challenges and other coding related events.
+sends reminders of competitive coding and machine learning contests, hackathons,
+capture-the-flag challenges and other coding related events.
 
 ## How to Use?
 
