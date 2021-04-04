@@ -1,12 +1,12 @@
 const now = new Date();
 
 const afterDate = () =>
-  new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
 const beforeDate = () =>
-  new Date(afterDate().setUTCDate(afterDate().getUTCDate() + 4));
+  new Date(afterDate().setDate(afterDate().getDate() + 4));
 
 const preserveTill = () =>
-  new Date(afterDate().setUTCDate(afterDate().getUTCDate() - 5));
+  new Date(afterDate().setDate(afterDate().getDate() - 5));
 
 module.exports = { afterDate, beforeDate, preserveTill };
