@@ -121,6 +121,9 @@ remote build.**
 You can modify [this cron expression][49] if you want to run the bot at
 different intervals. It currently runs every 2 hours.
 
+The default timezone in an Azure Functions App is UTC. If you wanna run your
+job in some other timezone you need to set [`WEBSITE_TIME_ZONE`][61].
+
 If you're stuck on something we might be of some help. Feel free to create a
 [new discussion][50].
 
@@ -186,3 +189,4 @@ If you're stuck on something we might be of some help. Feel free to create a
 [58]: https://img.shields.io/badge/Microsoft%20Azure-555555?style=for-the-badge&logo=microsoft-azure
 [59]: https://user-images.githubusercontent.com/40380293/113475921-b3a67280-9495-11eb-8735-7fd009461999.png
 [60]: https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-
+[61]: https://stackoverflow.com/a/50851821/11613622
