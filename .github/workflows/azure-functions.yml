@@ -1,4 +1,4 @@
-name: Build and deploy Node.js project to Azure Function App - hackremind
+name: Deploy
 
 on:
   push:
