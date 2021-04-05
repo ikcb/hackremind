@@ -11,3 +11,5 @@ commitlint.config.js
 
 test
 assets
+
+node_modules

@@ -41,7 +41,7 @@ jobs:
           app-name: hackremind
           slot-name: production
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/${{ env.RELEASE_BUNDLE_PATH }}
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_21355c496f0440319f64e1ba124febbd }}
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
           respect-funcignore: true

@@ -5,19 +5,7 @@
       "type": "func",
       "command": "host start",
       "problemMatcher": "$func-node-watch",
-      "isBackground": true,
-      "dependsOn": "yarn install"
-    },
-    {
-      "type": "shell",
-      "label": "yarn install",
-      "command": "yarn"
-    },
-    {
-      "type": "shell",
-      "label": "yarn prune",
-      "command": "yarn install --production --ignore-scripts --prefer-offline",
-      "problemMatcher": []
+      "isBackground": true
     }
   ]
 }
