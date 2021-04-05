@@ -98,7 +98,8 @@ const softTruncate = (data, limit) => {
   const txt = data.trim();
 
   // check if input is Markdown or HTML (Discord does not support HTML in MD)
-  const isHTML = /<[^>]*>/.test(txt);
+  const isHTML =
+    /<[^>]*>/.test(txt) || /&(?:[a-z\d]+|#\d+|#x[a-f\d]+);/i.test(txt);
 
   // convert HTML to Markdown if present
   const md = isHTML ? turndownService.turndown(fixTables(txt)) : txt;
