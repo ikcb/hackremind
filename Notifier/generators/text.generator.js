@@ -55,17 +55,23 @@ const fixTables = content => {
     if (thead.length === 0) thead = $('<thead></thead>').prependTo(myTable);
     if (tbody.length === 0) tbody = $('<tbody></tbody>').appendTo(myTable);
 
-    thRows.clone().appendTo(thead);
-    thRows.remove();
-
-    tdRows.clone().appendTo(tbody);
-    tdRows.remove();
+    thRows.appendTo(thead);
+    tdRows.appendTo(tbody);
 
     if (thead.find('tr').length === 0 && tbody.find('tr').length) {
       const firstRow = tbody.find('tr').first();
       firstRow.appendTo(thead);
     }
   });
+
+  return $('body').html();
+};
+
+const fixLists = content => {
+  const $ = cheerio.load(content);
+
+  $('li + ul').each((i, el) => $(el).appendTo($(el).prev()));
+  $('li + ol').each((i, el) => $(el).appendTo($(el).prev()));
 
   return $('body').html();
 };
@@ -102,7 +108,7 @@ const softTruncate = (data, limit) => {
     /<[^>]*>/.test(txt) || /&(?:[a-z\d]+|#\d+|#x[a-f\d]+);/i.test(txt);
 
   // convert HTML to Markdown if present
-  const md = isHTML ? turndownService.turndown(fixTables(txt)) : txt;
+  const md = isHTML ? turndownService.turndown(fixTables(fixLists(txt))) : txt;
 
   // markdown aware truncate
   let s = truncate(md, { limit, ellipsis: true });
