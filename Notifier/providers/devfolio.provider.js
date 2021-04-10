@@ -1,7 +1,5 @@
 const got = require('got');
 
-const { beforeDate } = require('../tuners');
-
 module.exports = async () => {
   // call the Devfolio API
   const devfolio = await got('https://devfolio.co/api/hackathons', {
@@ -15,7 +13,7 @@ module.exports = async () => {
   // transform result to events
   return devfolio.result
     .filter(
-      ({ hackathon_setting: hs }) => new Date(hs.reg_ends_at) < beforeDate()
+      ({ hackathon_setting: hs }) => new Date(hs.reg_ends_at) < beforeDate
     )
     .map(e => ({
       title: e.name,

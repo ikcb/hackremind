@@ -2,11 +2,15 @@ const { Client } = require('discord.js');
 const { connect, connection } = require('mongoose');
 
 const getEvents = require('./providers');
-const { config, hosts, preserveTill } = require('./tuners');
+const { config, hosts } = require('./tuners');
 const { Event } = require('./models');
 const { generateEmbed, openBrowser, closeBrowser } = require('./generators');
 
 module.exports = async (context, timer) => {
+  const now = new Date();
+  global.afterDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  global.beforeDate = new Date(+afterDate + 4 * 8.64e7);
+
   // connect to the mongodb instance
   await connect(config.MONGO_URI, {
     useNewUrlParser: true,
@@ -16,7 +20,7 @@ module.exports = async (context, timer) => {
   });
 
   // remove events older than 5 days
-  Event.remove({ start: { $lt: preserveTill() } });
+  Event.remove({ start: { $lt: new Date(+afterDate - 5 * 8.64e7) } });
 
   const newEvents = [];
 

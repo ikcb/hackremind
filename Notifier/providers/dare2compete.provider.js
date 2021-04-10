@@ -1,6 +1,5 @@
 const got = require('got');
 
-const { beforeDate } = require('../tuners');
 const { fixImageWidth } = require('../generators');
 
 module.exports = async () => {
@@ -17,7 +16,7 @@ module.exports = async () => {
   ).json();
 
   // remove hackathons which are starting after more than 2 days
-  data = data.data.filter(e => new Date(e.start_date) < beforeDate());
+  data = data.data.filter(e => new Date(e.start_date) < beforeDate);
 
   // transform IDs to events
   await Promise.all(

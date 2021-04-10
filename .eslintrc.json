@@ -6,6 +6,10 @@
     "plugin:security/recommended",
     "plugin:prettier/recommended"
   ],
+  "globals": {
+    "afterDate": "writable",
+    "beforeDate": "writable"
+  },
   "plugins": ["autofix", "security", "sort-requires", "prettier"],
   "rules": {
     "no-empty": [2, { "allowEmptyCatch": true }],
