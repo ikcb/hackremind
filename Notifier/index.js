@@ -1,15 +1,26 @@
+// globals-begin
+
+const now = new Date();
+global.afterDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+global.beforeDate = new Date(+afterDate + 4 * 8.64e7);
+
+global.pick = (obj, keys) =>
+  Object.fromEntries(
+    Object.entries(obj).filter(([key]) => [...keys].includes(key))
+  );
+
+// globals-end
+
 const { Client } = require('discord.js');
 const { connect, connection } = require('mongoose');
 
 const getEvents = require('./providers');
-const { config, hosts } = require('./tuners');
+const { config, hosts, intercept, reset } = require('./tuners');
 const { Event } = require('./models');
 const { generateEmbed, openBrowser, closeBrowser } = require('./generators');
 
 module.exports = async (context, timer) => {
-  const now = new Date();
-  global.afterDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  global.beforeDate = new Date(+afterDate + 4 * 8.64e7);
+  intercept(context);
 
   // connect to the mongodb instance
   await connect(config.MONGO_URI, {
@@ -72,15 +83,18 @@ module.exports = async (context, timer) => {
       const message = await channel.send({ embed });
       channel.type === 'news' && (await message.crosspost());
     } catch (e) {
-      context.log.error(e);
+      console.error(e);
       failed.push(e);
     }
   }
 
   // TODO: remove failed embeds from db so that they can be pushed on later runs
-  context.log.warn(failed);
+  console.warn(failed);
 
   // close connection to the database
   await connection.close();
   client.destroy();
+
+  reset();
+  context.done();
 };

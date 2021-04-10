@@ -1,4 +1,5 @@
 {
+  "env": { "es2021": true },
   "extends": [
     "eslint:recommended",
     "airbnb-base",
@@ -7,8 +8,9 @@
     "plugin:prettier/recommended"
   ],
   "globals": {
-    "afterDate": "writable",
-    "beforeDate": "writable"
+    "afterDate": "readonly",
+    "beforeDate": "readonly",
+    "pick": "readonly"
   },
   "plugins": ["autofix", "security", "sort-requires", "prettier"],
   "rules": {
