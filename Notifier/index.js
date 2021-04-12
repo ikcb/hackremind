@@ -1,8 +1,14 @@
-// globals-begin
+const { Client } = require('discord.js');
+const { connect, connection } = require('mongoose');
 
+const {
+  config: { TIME_WINDOW }
+} = require('./tuners');
+
+// globals-begin
 const now = new Date();
 global.afterDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-global.beforeDate = new Date(+afterDate + 4 * 8.64e7);
+global.beforeDate = new Date(+afterDate + (TIME_WINDOW + 1) * 8.64e7);
 
 global.pick = (obj, keys) =>
   Object.fromEntries(
@@ -10,9 +16,6 @@ global.pick = (obj, keys) =>
   );
 
 // globals-end
-
-const { Client } = require('discord.js');
-const { connect, connection } = require('mongoose');
 
 const getEvents = require('./providers');
 const { config, hosts, intercept, reset } = require('./tuners');
@@ -31,7 +34,9 @@ module.exports = async (context, timer) => {
   });
 
   // remove events older than 5 days
-  Event.remove({ start: { $lt: new Date(+afterDate - 5 * 8.64e7) } });
+  Event.remove({
+    start: { $lt: new Date(+afterDate - (TIME_WINDOW + 2) * 8.64e7) }
+  });
 
   const newEvents = [];
 
