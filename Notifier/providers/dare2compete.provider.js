@@ -4,7 +4,8 @@ const { fixImageWidth } = require('../generators');
 const { hosts } = require('../tuners');
 
 module.exports = async () => {
-  if (!hosts['dare2compete.com']) return [];
+  const host = 'dare2compete.com';
+  if (!hosts[host]) return [];
 
   // call the Dare2Compete API
   const {
@@ -12,8 +13,8 @@ module.exports = async () => {
   } = await got('https://api.dare2compete.com/api/opportunity/search-new', {
     searchParams: {
       opportunity: 'hackathons',
-      filters: ',All,Open',
-      types: 'teamsize,eligible,oppstatus'
+      filters: ['All', 'Open'].join(),
+      types: ['teamsize', 'eligible', 'oppstatus'].join()
     }
   }).json();
 
@@ -41,7 +42,7 @@ module.exports = async () => {
         data[i] = {
           title: competition.title,
           description: competition.meta_info.description || competition.details,
-          host: 'dare2compete.com',
+          host,
           url: competition.web_url || competition.seo_url,
           start: competition.regnRequirements.start_regn_dt,
           end: competition.regnRequirements.end_regn_dt,

@@ -1,8 +1,13 @@
 const got = require('got');
 
+const { hosts } = require('../tuners');
+
 module.exports = async () => {
+  const host = 'devfolio.co';
+  if (!hosts[host]) return [];
+
   // call the Devfolio API
-  const devfolio = await got('https://devfolio.co/api/hackathons', {
+  const { result: data } = await got('https://devfolio.co/api/hackathons', {
     searchParams: {
       filter: 'application_open',
       page: 1,
@@ -11,14 +16,14 @@ module.exports = async () => {
   }).json();
 
   // transform result to events
-  return devfolio.result
+  return data
     .filter(
       ({ hackathon_setting: hs }) => new Date(hs.reg_ends_at) < beforeDate
     )
     .map(e => ({
       title: e.name,
       description: e.desc,
-      host: 'devfolio.co',
+      host,
       url:
         e.hackathon_setting.site ||
         `https://${e.hackathon_setting.subdomain}.devfolio.co`,

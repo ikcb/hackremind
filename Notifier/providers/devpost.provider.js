@@ -2,21 +2,20 @@ const cheerio = require('cheerio');
 const entities = require('entities');
 const got = require('got');
 
+const { hosts } = require('../tuners');
+
 const fetchData = async (url, searchParams, page = 1) => {
   // call the Devpost API
-  const data = await got(url, {
+  const {
+    meta: { total_count: totalCount, per_page: perPage },
+    hackathons
+  } = await got(url, {
     searchParams: Object.assign(searchParams, { page })
   }).json();
 
   // implement pagination
-  const { total_count: totalCount, per_page: perPage } = data.meta;
-  if (perPage * page >= totalCount) return data.hackathons;
-
-  // append hackathons recursively
-  return [
-    ...data.hackathons,
-    ...(await fetchData(url, searchParams, page + 1))
-  ];
+  if (perPage * page >= totalCount) return hackathons;
+  return [...hackathons, ...(await fetchData(url, searchParams, page + 1))];
 };
 
 const parseDate = str => {
@@ -33,6 +32,9 @@ const getDetails = async url => {
 };
 
 module.exports = async () => {
+  const host = 'devpost.com';
+  if (!hosts[host]) return [];
+
   // fetch hackathon data
   let data = await fetchData('https://devpost.com/api/hackathons', {
     challenge_type: 'online',
@@ -40,7 +42,7 @@ module.exports = async () => {
     status: 'upcoming'
   });
 
-  // remove hackathons whose submission start after more than 2 days
+  // remove hackathons whose submission start after TIME_WINDOW
   data = data.filter(e => parseDate(e.submission_period_dates) < beforeDate);
 
   // transform data to events
@@ -51,7 +53,7 @@ module.exports = async () => {
       data[i] = {
         title: e.title,
         description: entities.decodeHTML(details.description),
-        host: 'devpost.com',
+        host,
         url: e.url,
         start: details.startDate,
         end: details.endDate,
