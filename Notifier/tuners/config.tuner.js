@@ -9,6 +9,7 @@ const {
   CLIST_BEARER,
   CONCURRENCY: _CONC = 4,
   ICONS_URL: _ICON = '',
+  INTERNATIONAL: _INT = 'false',
   MONGO_URI = 'mongodb://localhost:27017/hackremind',
   ONE_PX_IMG = 'https://github.com/iiitkota-codebase/hackremind/raw/main/assets/520x1-00000000.png',
   SKILLENZA_JWT
@@ -20,6 +21,7 @@ const CONCURRENCY = Number(_CONC);
 const ICONS_URL = _ICON
   ? `${_ICON}${_ICON.endsWith('/') ? '' : '/'}`
   : 'https://raw.githubusercontent.com/iiitkota-codebase/hackremind/main/assets/icons/';
+const INTERNATIONAL = _INT.toLowerCase().trim() === 'true';
 
 module.exports = {
   BOT_TOKEN,
@@ -27,6 +29,7 @@ module.exports = {
   CLIST_BEARER,
   CONCURRENCY,
   ICONS_URL,
+  INTERNATIONAL,
   MONGO_URI,
   ONE_PX_IMG,
   PRODUCTION,
