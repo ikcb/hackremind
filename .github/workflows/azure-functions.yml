@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.js'
+      - '**.json'
+      - '!.*'
+  workflow_dispatch:
+
+env:
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
+  NODE_VERSION: 14.x
+  RELEASE_BUNDLE_PATH: release-bundle
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub Action
+        uses: actions/checkout@v2
+
+      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Copy Files to Release Bundle
+        shell: bash
+        run: |
+          pushd ./${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          rsync -av --prune-empty-dirs --exclude-from .funcignore ./ ${{ env.RELEASE_BUNDLE_PATH }}
+          popd
+
+      - name: Run Azure Functions Action
+        uses: Azure/functions-action@v1
+        id: fa
+        with:
+          app-name: hackremind
+          slot-name: production
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/${{ env.RELEASE_BUNDLE_PATH }}
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile }}
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true
+          respect-funcignore: true
+#
+# Known Issue    : https://github.com/Azure/functions-action/issues/62
+# Workaround     : https://github.com/Azure/functions-action/issues/36#issuecomment-739555304
+#

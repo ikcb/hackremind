@@ -1,0 +1,30 @@
+{
+  "env": { "es2021": true },
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base",
+    "plugin:node/recommended",
+    "plugin:security/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["autofix", "security", "sort-requires", "prettier"],
+  "rules": {
+    "no-empty": [2, { "allowEmptyCatch": true }],
+    "no-await-in-loop": 0,
+    "no-nested-ternary": 0,
+    "security/detect-unsafe-regex": 0,
+    "security/detect-object-injection": 0,
+    "no-console": 0,
+    "no-unused-expressions": 0,
+    "no-process-exit": 0,
+    "camelcase": [
+      2,
+      { "properties": "never", "ignoreDestructuring": true, "allow": ["_at$"] }
+    ],
+    "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
+    "no-unused-vars": [2, { "args": "none" }],
+    "autofix/no-unused-vars": [2, { "args": "none" }],
+    "sort-requires/sort-requires": 2,
+    "prettier/prettier": 2
+  }
+}

@@ -1,0 +1,15 @@
+.*
+!/.funcignore
+
+*.js.map
+*.ts
+*.md
+
+local.settings.json
+tsconfig.json
+commitlint.config.js
+
+test
+assets
+
+node_modules

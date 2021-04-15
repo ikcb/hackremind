@@ -1,0 +1,40 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 14.x
+
+jobs:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout GitHub Action
+        uses: actions/checkout@v2
+
+      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check Lint
+        shell: bash
+        run: |
+          yarn
+          yarn prettier --check . --ignore-unknown
+          yarn prettier-package-json --list-different package.json
+          yarn eslint Notifier --ext .js
+          yarn markdownlint '**/*.md' --ignore node_modules
+          find . -name '*.json' -not -path './node_modules/*' -exec yarn jsonlint {} -q \;
