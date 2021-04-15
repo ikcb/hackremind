@@ -7,6 +7,9 @@
     "plugin:security/recommended",
     "plugin:prettier/recommended"
   ],
+  "globals": {
+    "pick": "readonly"
+  },
   "plugins": ["autofix", "security", "sort-requires", "prettier"],
   "rules": {
     "no-empty": [2, { "allowEmptyCatch": true }],

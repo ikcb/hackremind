@@ -1,4 +1,3 @@
-const { pick } = require('./utils.tuner');
 const { PRODUCTION } = require('./config.tuner');
 
 const original = pick(console, ['log', 'error', 'warn', 'info', 'debug']);
