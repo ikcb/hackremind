@@ -12,6 +12,7 @@
     "cheerio": "^1.0.0-rc.5",
     "discord.js": "^12.5.3",
     "entities": "^2.2.0",
+    "fkill": "^7.1.1",
     "got": "^11.8.2",
     "markdown-truncate": "^1.0.4",
     "mongoose": "^5.12.3",
@@ -20,7 +21,6 @@
     "probe-image-size": "^7.0.1",
     "puppeteer": "^8.0.0",
     "randomcolor": "^0.6.2",
-    "shelljs": "^0.8.4",
     "turndown": "^7.0.0",
     "turndown-plugin-gfm": "^1.0.2"
   },
