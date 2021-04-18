@@ -21,6 +21,7 @@
     "probe-image-size": "^7.1.0",
     "puppeteer": "^8.0.0",
     "randomcolor": "^0.6.2",
+    "showdown": "^1.9.1",
     "turndown": "^7.0.0",
     "turndown-plugin-gfm": "^1.0.2"
   },

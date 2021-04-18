@@ -18,6 +18,17 @@ rules.image = {
   replacement: _ => ''
 };
 
+// discourage using headings of more than 50 characters
+rules.heading = {
+  filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+  replacement: (content, node) =>
+    `\n\n${
+      content.length > 50
+        ? `**${content}**`
+        : `${'#'.repeat(Number(node.nodeName.charAt(1)))} ${content.trim()}`
+    }\n\n`
+};
+
 // don't emphasis text containing no alphabet
 rules.strong = {
   filter: ['strong', 'b'],
@@ -30,7 +41,11 @@ rules.strong = {
 };
 
 // initialise Turndown service and configure it to use GitHub Flavored Markdown
-const turndownService = new TurndownService({ codeBlockStyle: 'fenced' });
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+  codeBlockStyle: 'fenced',
+  hr: `~~${'\u2800'.repeat(43)}~~`
+});
 turndownService.use(gfm);
 
 // configure service to use overridden rules
@@ -79,7 +94,9 @@ const fixLists = content => {
 // sanitization rules (order matters, hard to explain, added after stress tests)
 const replacements = [
   [/[\u200B-\u200D\uFEFF]/gu, ''],
-  [/^>([^ ])/gm, '> $1'],
+  [/^>\s*(?:#{2,}\s*([^#])|#+(\W))/gm, '> $1$2'],
+  [/^>\s+/gm, '> '],
+  [/^`{3}\s*([^]+?)\s*`{3}\s*?$/gm, '```\n$1\n```'],
   [/^[*\u2022][^\S\r\n]+/gmu, '\u2800\u2022\u2800'],
   [/^([^\S\r\n]*?)[^\S\r\n]\*[^\S\r\n]+/gm, '$1\u2800\u2800\u25e6\u2800'],
   [/(?<=^[^\S\r\n]*)[^\S\r\n]{2}(?=[^\S\r\n]*\u2800+\u25e6)/gmu, '\u2800'],
@@ -88,7 +105,7 @@ const replacements = [
   [/^([^\S\r\n]*?)[^\S\r\n](\d+.)[^\S\r\n]+/gm, '$1\u2800\u2800$2\u2800'],
   [/(?<=^[^\S\r\n]*)[^\S\r\n]{2}(?=[^\S\r\n]*\u2800+\d+.)/gmu, '\u2800'],
   [/(?<!~)~([^~\n]+)~(?!~)/g, '~~$1~~'],
-  [/^[^\S\r\n]*?#+[^\S\r\n]*([^]+?)$/gm, '\n> __**$1**__\n'],
+  [/^[^\S\r\n]*?#+[^\S\r\n]*([^]+?)[^\S\r\n]*$/gm, '\n> __**$1**__\n'],
   [/(?<=\u201c([^\u201d"]+))"/gu, '\u201d'],
   [/"(?=([^\u201c"]+)\u201d)/gu, '\u201c'],
   [/\n\s+\n/g, '\n\n'],

@@ -4,7 +4,7 @@ const { fixImageWidth } = require('../generators');
 const { hosts } = require('../tuners');
 
 module.exports = async () => {
-  const host = 'devfolio.co';
+  const host = 'dare2compete.com';
   if (!hosts[host]) return [];
 
   // call the Dare2Compete API
@@ -20,7 +20,10 @@ module.exports = async () => {
 
   return Promise.all(
     data
-      .filter(({ start_date: start }) => new Date(start) < beforeDate())
+      .filter(
+        ({ start_date: start }) =>
+          new Date(start) > afterDate() && new Date(start) < beforeDate()
+      )
       .map(async ({ id }, i) => {
         // fetch competition details from id
         const {

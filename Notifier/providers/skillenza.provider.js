@@ -1,4 +1,7 @@
 const got = require('got');
+const showdown = require('showdown');
+
+showdown.setFlavor('github');
 
 const {
   config: { SKILLENZA_JWT: Authorization },
@@ -32,6 +35,7 @@ module.exports = async () => {
   }
 
   const data = await fetchData('https://skillenza.com/api/v1/activity/all');
+  const converter = new showdown.Converter();
 
   return Promise.all(
     data
@@ -39,12 +43,16 @@ module.exports = async () => {
       .map(async e => ({
         id: e.id,
         title: e.title,
-        description: e.description,
+        description: converter.makeHtml(
+          e.description
+            .replace(/^(#+)([^#])/gm, '$1 $2')
+            .replace(/#+\s*$/gm, '')
+        ),
         host,
         url: `https://skillenza.com/challenge/${e.slug}`,
         start: e.application_start_time,
         end: e.application_end_time,
-        image: await fixImageWidth(e.card, e.banner).url,
+        image: (await fixImageWidth(e.card, e.banner)).url,
         thumbnail: e.gang_data.logo
       }))
   );

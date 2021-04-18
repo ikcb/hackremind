@@ -19,7 +19,7 @@ module.exports = async () => {
   return data
     .filter(
       ({ hackathon_setting: { reg_ends_at: end } }) =>
-        new Date(end) < beforeDate()
+        new Date(end) > afterDate() && new Date(end) < beforeDate()
     )
     .map(e => ({
       id: e.uuid,
