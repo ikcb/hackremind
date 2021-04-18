@@ -18,7 +18,7 @@ module.exports = async () => {
     }
   }).json();
 
-  data = data.filter(({ start_date: start }) => new Date(start) < beforeDate);
+  data = data.filter(({ start_date: start }) => new Date(start) < beforeDate());
 
   await Promise.all(
     data.map(async ({ id }, i) => {

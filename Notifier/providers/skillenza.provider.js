@@ -34,7 +34,7 @@ module.exports = async () => {
   const data = await fetchData('https://skillenza.com/api/v1/activity/all');
 
   return data
-    .filter(({ application_end_time: end }) => new Date(end) < beforeDate)
+    .filter(({ application_end_time: end }) => new Date(end) < beforeDate())
     .map(e => ({
       id: e.id,
       title: e.title,

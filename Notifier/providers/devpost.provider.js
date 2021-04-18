@@ -44,7 +44,7 @@ module.exports = async () => {
 
   // remove hackathons whose submission starts after 3 days
   data = data.filter(
-    ({ submission_period_dates: s }) => parseDate(s) < beforeDate
+    ({ submission_period_dates: s }) => parseDate(s) < beforeDate()
   );
 
   // transform data to events

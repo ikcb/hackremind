@@ -1,6 +1,10 @@
-const now = new Date();
-global.afterDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-global.beforeDate = new Date(+afterDate + 4 * 8.64e7);
+global.afterDate = () =>
+  new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    new Date().getDate()
+  );
+global.beforeDate = () => new Date(+afterDate() + 4 * 8.64e7);
 
 const clist = require('./clist.provider');
 const dare2compete = require('./dare2compete.provider');

@@ -16,4 +16,4 @@ const eventSchema = new Schema(
   { id: false }
 );
 
-module.exports = { Event: model('Event', eventSchema) };
+module.exports = model('Event', eventSchema);
