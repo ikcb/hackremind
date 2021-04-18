@@ -13,7 +13,7 @@ const fetchData = async (url, page = 1) => {
   const { data } = await got(url, {
     headers: { Authorization },
     searchParams: { page }
-  });
+  }).json();
 
   return [...data, ...(await fetchData(url, page + 1))];
 };
@@ -33,17 +33,19 @@ module.exports = async () => {
 
   const data = await fetchData('https://skillenza.com/api/v1/activity/all');
 
-  return data
-    .filter(({ application_end_time: end }) => new Date(end) < beforeDate())
-    .map(e => ({
-      id: e.id,
-      title: e.title,
-      description: e.description,
-      host,
-      url: `https://skillenza.com/challenge/${e.slug}`,
-      start: e.application_start_time,
-      end: e.application_end_time,
-      image: fixImageWidth(e.card, e.banner),
-      thumbnail: e.gang_data.logo
-    }));
+  return Promise.all(
+    data
+      .filter(({ application_end_time: end }) => new Date(end) < beforeDate())
+      .map(async e => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        host,
+        url: `https://skillenza.com/challenge/${e.slug}`,
+        start: e.application_start_time,
+        end: e.application_end_time,
+        image: await fixImageWidth(e.card, e.banner).url,
+        thumbnail: e.gang_data.logo
+      }))
+  );
 };

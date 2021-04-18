@@ -25,7 +25,7 @@ module.exports = async () => {
 
   // remove hiring events and sort data by timestamp
   return data
-    .filter(e => !/hiring/i.test(e.title))
+    .filter(e => !/recruit|hir(e|ing)/i.test(JSON.stringify(e)))
     .sort(
       (a, b) =>
         new Date(generateTimestamp(a).timestamp).getTime() -

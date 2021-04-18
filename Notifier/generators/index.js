@@ -50,7 +50,7 @@ const generateEmbed = async e => {
   const author = {
     name: truncateText(hosts[host], 256),
     url: await generateHost(host),
-    icon_url: `https://raw.githubusercontent.com/iiitkota-codebase/hackremind/main/assets/icons/${host.replace(
+    icon_url: `https://raw.githubusercontent.com/iiitkota-codebase/hackremind/refactor-preview/assets/icons/${host.replace(
       /[./]/g,
       '_'
     )}.png`

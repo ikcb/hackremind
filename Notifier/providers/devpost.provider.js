@@ -36,35 +36,30 @@ module.exports = async () => {
   if (!hosts[host]) return [];
 
   // fetch hackathon data
-  let data = await fetchData('https://devpost.com/api/hackathons', {
+  const data = await fetchData('https://devpost.com/api/hackathons', {
     challenge_type: 'online',
     order_by: 'recently-added',
     status: 'upcoming'
   });
 
-  // remove hackathons whose submission starts after 3 days
-  data = data.filter(
-    ({ submission_period_dates: s }) => parseDate(s) < beforeDate()
-  );
-
   // transform data to events
-  await Promise.all(
-    data.map(async (e, i) => {
-      const details = await getDetails(e.url);
+  return Promise.all(
+    data
+      .filter(({ submission_period_dates: s }) => parseDate(s) < beforeDate())
+      .map(async (e, i) => {
+        const details = await getDetails(e.url);
 
-      data[i] = {
-        id: e.id,
-        title: e.title,
-        description: entities.decodeHTML(details.description),
-        host,
-        url: e.url,
-        start: details.startDate,
-        end: details.endDate,
-        image: details.image,
-        thumbnail: `https://${e.thumbnail_url.replace(/(^\w+:|^)\/\//, '')}`
-      };
-    })
+        return {
+          id: e.id,
+          title: e.title,
+          description: entities.decodeHTML(details.description),
+          host,
+          url: e.url,
+          start: details.startDate,
+          end: details.endDate,
+          image: details.image,
+          thumbnail: `https://${e.thumbnail_url.replace(/(^\w+:|^)\/\//, '')}`
+        };
+      })
   );
-
-  return data;
 };

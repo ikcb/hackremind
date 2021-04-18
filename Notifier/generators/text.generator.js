@@ -79,6 +79,7 @@ const fixLists = content => {
 // sanitization rules (order matters, hard to explain, added after stress tests)
 const replacements = [
   [/[\u200B-\u200D\uFEFF]/gu, ''],
+  [/^>([^ ])/gm, '> $1'],
   [/^[*\u2022][^\S\r\n]+/gmu, '\u2800\u2022\u2800'],
   [/^([^\S\r\n]*?)[^\S\r\n]\*[^\S\r\n]+/gm, '$1\u2800\u2800\u25e6\u2800'],
   [/(?<=^[^\S\r\n]*)[^\S\r\n]{2}(?=[^\S\r\n]*\u2800+\u25e6)/gmu, '\u2800'],
@@ -105,10 +106,13 @@ const softTruncate = (data, limit) => {
 
   // check if input is Markdown or HTML (Discord does not support HTML in MD)
   const isHTML =
-    /<[^>]*>/.test(txt) || /&(?:[a-z\d]+|#\d+|#x[a-f\d]+);/i.test(txt);
+    /<(?!br(?:\s+|>|\/))[^>]*>/i.test(txt) ||
+    /&(?:[a-z\d]+|#\d+|#x[a-f\d]+);/i.test(txt);
 
   // convert HTML to Markdown if present
-  const md = isHTML ? turndownService.turndown(fixTables(fixLists(txt))) : txt;
+  const md = isHTML
+    ? turndownService.turndown(fixTables(fixLists(txt)))
+    : txt.replace(/<(?=br(?:\s+|>|\/))[^>]*>/gi, '\n');
 
   // markdown aware truncate
   let s = truncate(md, { limit, ellipsis: true });
@@ -119,7 +123,7 @@ const softTruncate = (data, limit) => {
     if (replacement && replacement.length > 1) s = replacement;
   });
 
-  // remove whitespaces from end
+  // remove whitespace from end
   return s.trim();
 };
 
