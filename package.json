@@ -20,7 +20,7 @@
     "probe-image-size": "^7.0.1",
     "puppeteer": "^8.0.0",
     "randomcolor": "^0.6.2",
-    "shelljs": "^0.8.4",
+    "shelljs": "^0.8.5",
     "turndown": "^7.0.0",
     "turndown-plugin-gfm": "^1.0.2"
   },
