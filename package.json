@@ -12,7 +12,7 @@
     "cheerio": "^1.0.0-rc.5",
     "discord.js": "^12.5.3",
     "entities": "^2.2.0",
-    "got": "^11.8.2",
+    "got": "^11.8.5",
     "markdown-truncate": "^1.0.4",
     "mongoose": "^5.12.3",
     "node-vibrant": "3.1.6",
